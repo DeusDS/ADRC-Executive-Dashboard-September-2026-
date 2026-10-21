@@ -126,7 +126,9 @@ html, body { margin: 0; padding: 0; background: var(--color-bg); }
 .mk-howto ul { margin: 0; padding-left: 1.05rem; display: flex; flex-direction: column; gap: .35rem; font-size: var(--cds-font-size-caption); line-height: 1.55; color: var(--mk-ink); }
 .mk-howto li::marker { color: var(--mk-gold); }
 .mk-card .d { font-size: var(--cds-font-size-caption); color: var(--mk-muted); line-height: 1.5; }
-.mk-card .src { font-size: .72rem; color: var(--mk-muted); line-height: 1.5; border-top: 1px solid var(--mk-line); padding-top: .5rem; margin-top: .2rem; }
+.mk-card .src { font-size: .72rem; color: var(--mk-muted); line-height: 1.5; border-top: 1px solid var(--mk-line); padding-top: .5rem; margin-top: auto; }
+.mk-card .mk-howto + .src, .mk-card .mk-chart + .src, .mk-card .mk-tablewrap + .src, .mk-card .mk-ctx + .src { margin-top: auto; }
+.mk-card > .mk-howto { margin-bottom: .6rem; }
 .mk-key { display: flex; flex-wrap: wrap; gap: .3rem 1.1rem; font-size: var(--cds-font-size-caption); color: var(--mk-muted); margin: .1rem 0 0; padding: 0; list-style: none; }
 .mk-key li { display: flex; align-items: center; gap: .4rem; }
 .mk-sw { width: .72rem; height: .72rem; display: inline-block; }
@@ -250,6 +252,7 @@ html, body { margin: 0; padding: 0; background: var(--color-bg); }
         <div class="mk-card"><h3>Calls beyond capacity vs. staff on the phones, by month</h3><p class="d">Bars: average calls beyond capacity per business day, meaning callbacks booked that the team could not complete. Teal line: average staff on the phones (FTE, right scale). Gold is the reporting month. Lower bars are better.</p>
           <ul class="mk-key"><li><span class="mk-sw" style="background:var(--mk-gold)"></span>Reporting month</li><li><span class="mk-sw" style="background:var(--mk-navy)"></span>Earlier months</li><li><span class="mk-sw line" style="background:var(--mk-teal)"></span>Staff on the phones, FTE (right scale)</li></ul>
           <div class="mk-chart" id="c4m" data-source="month_summary"></div>
+          <div class="mk-howto" id="howto-capm"><span class="mk-mono hk">How to read this chart</span><ul id="howto-mlist"></ul></div>
           <p class="src">Source: ADRC Dashboard FY2027 workbook (callbacks scheduled, accepted); Queue Pivot Project workbook, column I.</p></div>
         <div class="mk-card"><h3>Calls beyond capacity vs. staff on the phones, each business day</h3><p class="d">One bar per business day through <span class="wk-end">—</span>; the navy line is staff on the phones (FTE, right scale). The guide below explains how to read it.</p>
           <ul class="mk-key"><li><span class="mk-sw" style="background:var(--mk-blue)"></span>Calls beyond capacity, reporting month</li><li><span class="mk-sw" style="background:var(--mk-cyan)"></span>Earlier days</li><li><span class="mk-sw line" style="background:var(--mk-navy)"></span>Staff on the phones, FTE (right scale)</li></ul>
@@ -874,6 +877,21 @@ dash.onData(() => {
 
 <script>
 /* ================= how-to guide for the business-day capacity chart ================= */
+window.MKhowtoMonthly = (R, all) => {
+  const ul = document.getElementById('howto-mlist'); ul.replaceChildren();
+  const { el, f0, f1 } = MK;
+  const mk = (m, field, text) => { const b = el('b', null, text); b.dataset.source = 'month_summary'; b.dataset.field = field; b.dataset.where = 'month=' + m; return b; };
+  const li = (parts) => { const l = el('li'); parts.filter(Boolean).forEach(p => l.append(typeof p === 'string' ? document.createTextNode(p) : p)); ul.appendChild(l); };
+  const m = R.month, i = all.findIndex(r => r.month === m), P = i > 0 ? all[i - 1] : null;
+  li(['Each bar is one month’s average: the month’s calls beyond capacity divided by its business days, so longer and shorter months compare fairly.']);
+  if (R.over_cap != null && R.over_cap_per_day != null) li([`Example: in ${R.month_name}, `, mk(m, 'over_cap', f0(R.over_cap)), ' calls went beyond capacity over ', mk(m, 'business_days', f0(R.business_days)), ' business days, about ', mk(m, 'over_cap_per_day', f0(R.over_cap_per_day)), ' per business day.']);
+  if (P && P.staff_avg != null && R.staff_avg != null && P.over_cap_per_day != null && R.over_cap_per_day != null) {
+    const moreStaff = R.staff_avg > P.staff_avg, fewer = R.over_cap_per_day < P.over_cap_per_day;
+    li([`Read the bars against the teal staffing line. From ${P.month_name} to ${R.month_name}, staff on the phones went from `, mk(P.month, 'staff_avg', f1(P.staff_avg)), ' to ', mk(m, 'staff_avg', f1(R.staff_avg)), ' FTE and calls beyond capacity went from ', mk(P.month, 'over_cap_per_day', f0(P.over_cap_per_day)), ' to ', mk(m, 'over_cap_per_day', f0(R.over_cap_per_day)), ' per business day.', moreStaff && fewer ? ' More staff helped, but did not close the gap.' : '']);
+  }
+  li(['Lower bars are better; a bar at zero would mean staff returned every callback booked. The staffing line starts in August because daily staff counts began Aug 18, and dashed boxes are months still to come.']);
+};
+
 window.MKhowto = (R, rows) => {
   const ul = document.getElementById('howto-list'); ul.replaceChildren();
   const q = dash.data('queue_daily');
@@ -898,6 +916,7 @@ dash.onData(() => {
   const hm = MK.box('c4m'), hd = MK.box('c4d');
   const sel = MK.month();
   if (MK.state(hm, ['month_summary']) === 'ok' && sel) {
+    const R4 = MK.row(); if (R4) MKhowtoMonthly(R4, dash.data('month_summary').data);
     MKmonthly(hm, dash.data('month_summary').data, { cSel: MK.C.gold, cPrev: MK.C.navy, cLine: MK.C.teal, value: r => r.over_cap_per_day, fmt: MK.f0, line: r => r.staff_avg,
       tip: r => [[MK.C.navy, 'Calls beyond capacity per business day', r.over_cap_per_day == null ? 'n/a' : MK.f0(r.over_cap_per_day)], [null, `Month total (${r.business_days} business days)`, r.over_cap == null ? 'n/a' : MK.f0(r.over_cap)], [MK.C.teal, 'Staff on the phones, FTE per business day', r.staff_avg == null ? 'Not tracked' : MK.f1(r.staff_avg), 'line']] });
   }
