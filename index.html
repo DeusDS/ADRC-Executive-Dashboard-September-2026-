@@ -74,7 +74,19 @@ html, body { margin: 0; padding: 0; background: var(--color-bg); }
 .mk-nav { background: #0a2348; color: #d3dce8; padding: .9rem 0 .75rem; border-top: 1px solid rgba(255,255,255,.06); }
 .mk-nav .row { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .45rem; }
 .mk-nav .row + .row { margin-top: .55rem; }
-.mk-nav .lab { color: #8ea2bd; font-weight: 600; margin-right: .5rem; min-width: 8.5rem; }
+.mk-nav .lab { color: #8ea2bd; font-weight: 600; margin-right: .5rem; }
+.mk-chap { padding: .75rem 0; border-bottom: 1px solid rgba(255,255,255,.1); }
+.mk-pane { display: none; }
+.mk-pane.on { display: block; }
+.mk-kpis .mk-kpi { transition: opacity .2s; }
+.mk-chap .row { flex-wrap: wrap; gap: .4rem; }
+@media (max-width: 700px) { .mk-chap .row { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 1px; } }
+.mk-chap .row::-webkit-scrollbar { display: none; }
+.mk-chap .mk-btn { white-space: nowrap; flex: none; display: inline-flex; align-items: center; gap: .4rem; font-size: .74rem; padding: .32rem .7rem; }
+.mk-chap .mk-btn .cn { color: #c8a04a; font-size: .68rem; }
+.mk-chap .mk-btn.on .cn { color: #1c1304; opacity: .7; }
+
+@media (max-width: 1200px) { .mk-chap .lab { display: none; } }
 .mk-btn { font-family: var(--mk-mono); font-size: .76rem; letter-spacing: .02em; color: #d3dce8; background: transparent; border: 1px solid rgba(255,255,255,.24); padding: .3rem .7rem; cursor: pointer; border-radius: 2px; transition: .13s; line-height: 1.3; }
 .mk-btn:hover:not(:disabled) { border-color: #fff; color: #fff; }
 .mk-btn.on { background: #c8a04a; border-color: #c8a04a; color: #1c1304; font-weight: 600; }
@@ -104,6 +116,9 @@ html, body { margin: 0; padding: 0; background: var(--color-bg); }
 .mk-kpi .cx { margin-top: .5rem; padding-top: .5rem; border-top: 1px solid var(--mk-line); font-size: var(--cds-font-size-caption); color: var(--mk-muted); line-height: 1.45; font-variant-numeric: tabular-nums; }
 .mk-kpi .cx b { color: var(--mk-ink); }
 .mk-chip.neu { background: var(--mk-navy-t); color: var(--mk-ink) !important; }
+.mk-ctxcard { margin-top: 1rem; }
+.mk-t5 { color: var(--mk-ink) !important; font-size: var(--cds-font-size-body) !important; }
+.mk-kfh2 { margin-top: 1.6rem; }
 .mk-kfn { font-size: var(--cds-font-size-caption); color: var(--mk-muted); margin-top: .55rem; }
 
 .mk-find { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: 1rem; }
@@ -116,7 +131,9 @@ html, body { margin: 0; padding: 0; background: var(--color-bg); }
 .mk-sech { display: flex; align-items: flex-start; gap: .85rem; margin: 0 0 .9rem; }
 .mk-sech .no { font-family: var(--mk-mono); font-size: .72rem; color: var(--mk-gold); border: 1px solid var(--mk-gold); padding: .2rem .4rem; line-height: 1.2; margin-top: .45rem; flex: none; }
 .mk-sech .tt { display: flex; flex-direction: column; gap: .25rem; }
-.mk-sech .k { color: var(--mk-muted); }
+.mk-sech .k { color: var(--mk-gold); }
+.mk-sech .kq { color: var(--mk-ink); }
+.mk-sech .kq::before { content: "·"; color: var(--mk-muted); margin: 0 .7em; }
 .mk-sech h2 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: clamp(1.25rem, 2.4vw, 1.65rem); line-height: 1.25; margin: 0; max-width: 60rem; }
 .mk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); gap: 1rem; }
 .mk-card { background: var(--mk-card); border: 1px solid var(--mk-line); padding: 1.15rem 1.25rem 1rem; display: flex; flex-direction: column; gap: .45rem; min-width: 0; }
@@ -212,21 +229,32 @@ html, body { margin: 0; padding: 0; background: var(--color-bg); }
     </div>
   </header>
 
+  <nav class="mk-nav mk-chap" id="chapters" aria-label="Dashboard views">
+    <div class="mk-wrap"><div class="row" role="tablist">
+      <span class="mk-mono lab">View</span>
+      <button class="mk-btn on" role="tab" aria-selected="true" data-tab="summary">Summary</button>
+      <button class="mk-btn" role="tab" aria-selected="false" data-tab="ex-1"><span class="cn">01</span>Days to Return a Call</button>
+      <button class="mk-btn" role="tab" aria-selected="false" data-tab="ex-2"><span class="cn">02</span>Calls in Queue</button>
+      <button class="mk-btn" role="tab" aria-selected="false" data-tab="ex-3"><span class="cn">03</span>Interactions Handled</button>
+      <button class="mk-btn" role="tab" aria-selected="false" data-tab="ex-4"><span class="cn">04</span>Over Capacity &amp; FTEs</button>
+      <button class="mk-btn" role="tab" aria-selected="false" data-tab="notes">Data Notes</button>
+    </div></div>
+  </nav>
+
 
   <div class="mk-body mk-wrap">
-    <section id="kpis" aria-label="Key figures">
-      <div class="mk-kfh mk-mono"><span>Key figures · <span class="g" id="kf-month">—</span> · FY2027</span><span id="kf-range">—</span></div>
+    <section id="kpis" aria-label="Key figures and findings">
+      <div class="mk-kfh mk-mono"><span>Key figures · <span class="g" id="kf-view">Summary</span> · <span id="kf-month">—</span></span><span id="kf-range">—</span></div>
       <div class="mk-kpis" id="kpi-row"></div>
-      <p class="mk-kfn" id="kpi-foot">Each card shows the monthly figure, a quick status, and supporting detail. Trends below run from July 1, 2026 through the end of the reporting month.</p>
+      <p class="mk-kfn" id="kpi-foot">Each card shows the monthly figure, a quick status, and supporting detail. Charts run from July 1, 2026 through the end of the reporting month.</p>
+      <div id="findings">
+        <div class="mk-kfh mk-mono mk-kfh2"><span>Key findings · <span class="g" id="kf-view2">Summary</span></span></div>
+        <div class="mk-find" id="find-row"></div>
+      </div>
     </section>
 
-    <section id="findings" aria-label="Key findings">
-      <div class="mk-kfh mk-mono"><span>Key findings</span></div>
-      <div class="mk-find" id="find-row"></div>
-    </section>
-
-    <section id="ex-1">
-      <div class="mk-sech"><span class="no">01</span><div class="tt"><span class="mk-mono k">How long callers wait</span><h2 id="t1" data-source="month_summary">—</h2></div></div>
+    <section id="ex-1" class="mk-pane" role="tabpanel">
+      <div class="mk-sech"><span class="no">01</span><div class="tt"><span class="mk-mono k">Item 01 · Days to return a call<span class="kq">How long callers wait</span></span><h2 id="t1" data-source="month_summary">—</h2></div></div>
       <div class="mk-grid">
         <div class="mk-card"><h3>Average wait for a callback, by month</h3><p class="d">Average business days callers waited for a callback, from the monthly tab. Gold is the reporting month, navy is earlier months, and dashed boxes are months still to come. The red dashed line is the DAS standard of 2 business days. Lower is better.</p>
           <ul class="mk-key"><li><span class="mk-sw" style="background:var(--mk-gold)"></span>Reporting month</li><li><span class="mk-sw" style="background:var(--mk-navy)"></span>Earlier months</li><li><span class="mk-sw dash"></span>DAS standard</li></ul>
@@ -239,8 +267,8 @@ html, body { margin: 0; padding: 0; background: var(--color-bg); }
       </div>
     </section>
 
-    <section id="ex-2">
-      <div class="mk-sech"><span class="no">02</span><div class="tt"><span class="mk-mono k">How many callers are waiting</span><h2 id="t2" data-source="month_summary">—</h2></div></div>
+    <section id="ex-2" class="mk-pane" role="tabpanel">
+      <div class="mk-sech"><span class="no">02</span><div class="tt"><span class="mk-mono k">Item 02 · Calls in the P28 queue<span class="kq">How many callers are waiting</span></span><h2 id="t2" data-source="month_summary">—</h2></div></div>
       <div class="mk-grid">
         <div class="mk-card"><h3>Callers still waiting at month-end</h3><p class="d">Callbacks still in the callback list when each month closed, from the monthly tab. Gold is the reporting month. Lower is better.</p>
           <ul class="mk-key"><li><span class="mk-sw" style="background:var(--mk-gold)"></span>Reporting month</li><li><span class="mk-sw" style="background:var(--mk-navy)"></span>Earlier months</li><li><span class="mk-sw ph"></span>Not yet reported</li></ul>
@@ -253,8 +281,8 @@ html, body { margin: 0; padding: 0; background: var(--color-bg); }
       </div>
     </section>
 
-    <section id="ex-3">
-      <div class="mk-sech"><span class="no">03</span><div class="tt"><span class="mk-mono k">How much work was completed</span><h2 id="t3" data-source="month_summary">—</h2></div></div>
+    <section id="ex-3" class="mk-pane" role="tabpanel">
+      <div class="mk-sech"><span class="no">03</span><div class="tt"><span class="mk-mono k">Item 03 · Interactions handled<span class="kq">How much work was completed</span></span><h2 id="t3" data-source="month_summary">—</h2></div></div>
       <div class="mk-grid">
         <div class="mk-card"><h3>Work completed each month, by type</h3><p class="d">Every completed contact, stacked by type; the number on top is the month’s total. The reporting month is shown in full color, earlier months are faded.</p>
           <ul class="mk-key"><li><span class="mk-sw" style="background:var(--mk-navy)"></span>Callbacks</li><li><span class="mk-sw" style="background:var(--mk-blue)"></span>Voicemail &amp; outbound</li><li><span class="mk-sw" style="background:var(--mk-teal)"></span>Web intakes</li><li><span class="mk-sw" style="background:var(--mk-cyan)"></span>Other channels</li></ul>
@@ -268,8 +296,8 @@ html, body { margin: 0; padding: 0; background: var(--color-bg); }
       </div>
     </section>
 
-    <section id="ex-4">
-      <div class="mk-sech"><span class="no">04</span><div class="tt"><span class="mk-mono k">Can staff keep up with demand?</span><h2 id="t4" data-source="month_summary">—</h2></div></div>
+    <section id="ex-4" class="mk-pane" role="tabpanel">
+      <div class="mk-sech"><span class="no">04</span><div class="tt"><span class="mk-mono k">Item 04 · Calls over capacity &amp; FTEs<span class="kq">Can staff keep up?</span></span><h2 id="t4" data-source="month_summary">—</h2></div></div>
       <div class="mk-grid">
         <div class="mk-card"><h3>Calls beyond capacity vs. staff on the phones, by month</h3><p class="d">Bars: average calls beyond capacity per business day, meaning callbacks booked that the team could not complete. Teal line: average staff on the phones (FTE, right scale). Gold is the reporting month. Lower bars are better.</p>
           <ul class="mk-key"><li><span class="mk-sw" style="background:var(--mk-gold)"></span>Reporting month</li><li><span class="mk-sw" style="background:var(--mk-navy)"></span>Earlier months</li><li><span class="mk-sw line" style="background:var(--mk-teal)"></span>Staff on the phones, FTE (right scale)</li></ul>
@@ -282,17 +310,14 @@ html, body { margin: 0; padding: 0; background: var(--color-bg); }
           <div class="mk-howto" id="howto-cap"><span class="mk-mono hk">How to read this chart</span><ul id="howto-list"></ul></div>
           <p class="src">Source: Queue Pivot Project workbook, columns E and I.</p></div>
       </div>
-    </section>
-
-    <section id="ex-5">
-      <div class="mk-sech"><span class="no">05</span><div class="tt"><span class="mk-mono k">Staff effort and quality</span><h2 id="t5" data-source="month_summary">—</h2></div></div>
-      <div class="mk-card"><h3>Staff workload and quality, <span id="ctx-month">—</span></h3><p class="d">Leadership asked to separate staff productivity from staffing capacity. Per-staff call averages are left out on purpose: staff rotate between the callback queue, screenings and web intakes, so a calls-per-person figure would understate their work.</p>
+      <div class="mk-card mk-ctxcard"><h3>Staff workload and quality, <span id="ctx-month">—</span></h3><p class="d mk-t5" id="t5">—</p><p class="d">Leadership asked to separate staff productivity from staffing capacity. Per-staff call averages are left out on purpose: staff rotate between the callback queue, screenings and web intakes, so a calls-per-person figure would understate their work.</p>
         <div class="mk-ctx" id="ctx-row"></div>
         <p class="src">Source: ADRC Dashboard FY2027 workbook, monthly tab for the reporting month (team averages).</p></div>
     </section>
 
-    <section id="notes">
-      <div class="mk-sech"><span class="no">06</span><div class="tt"><span class="mk-mono k">Data notes</span><h2>How the figures were built and how to read each exhibit</h2></div></div>
+
+    <section id="notes" class="mk-pane" role="tabpanel">
+      <div class="mk-sech"><span class="no">i</span><div class="tt"><span class="mk-mono k">Data notes</span><h2>How the figures were built and how to read each item</h2></div></div>
       <div class="mk-card"><ol class="mk-notes" id="notes-list"></ol></div>
     </section>
 
@@ -381,6 +406,21 @@ dash.calc('month_summary', {
         web_intakes: M ? n(M.web_intakes) : null,
         reported_calls: M ? n(M.calls_reported) : null,
         tracker_calls: covered ? sum(T, 'serviced_callbacks') + sum(T, 'serviced_voicemail') + sum(T, 'serviced_outbound') : null,
+        bd_change: M && P && P.business_sop_days != null ? n(M.business_sop_days) - n(P.business_sop_days) : null,
+        booked_per_bday: covered ? Math.round(sum(T, 'callbacks_scheduled') / T.length) : null,
+        aps: M ? n(M.aps_referrals) : null,
+        emails: M ? n(M.info_emails) : null,
+        walk_ins: M ? n(M.walk_ins) : null,
+        mac: M ? n(M.mac_referrals) : null,
+        other_channels: M ? n(M.aps_referrals) + n(M.info_emails) + n(M.walk_ins) + n(M.mac_referrals) : null,
+        calls_share: M ? r3(n(M.calls_serviced) / total) : null,
+        callbacks_n: M ? n(M.callbacks_serviced) : null,
+        vm_out_n: M ? n(M.calls_serviced) - n(M.callbacks_serviced) : null,
+        callbacks_change: M && P ? n(M.callbacks_serviced) - n(P.callbacks_serviced) : null,
+        vm_out_change: M && P ? (n(M.calls_serviced) - n(M.callbacks_serviced)) - (n(P.calls_serviced) - n(P.callbacks_serviced)) : null,
+        web_change: M && P ? n(M.web_intakes) - n(P.web_intakes) : null,
+        over_cap_min_day: covered ? Math.min(...T.map(r => -n(r.diff_scheduled_accepted))) : null,
+        over_cap_min_date: covered ? T.reduce((a, r) => -n(r.diff_scheduled_accepted) < -n(a.diff_scheduled_accepted) ? r : a).date : '',
         cleanout_date: cleanIn ? clean.date : '',
         queue_low_after_cleanout: after.length ? Math.min(...after.map(r => n(r.callbacks_in_queue))) : null,
         bd_low_after_cleanout: after.length ? Math.min(...after.map(r => n(r.business_days))) : null,
@@ -422,6 +462,22 @@ dash.calc('weekly_by_report', {
       }
     }
     return out;
+  }
+});
+
+dash.calc('week_stats', {
+  inputs: ['weekly_by_report'],
+  title: 'Weekly wait summary, by reporting month',
+  description: 'For each reporting month, the weeks that include its business days: how many there were, how many averaged 2 business days or less (the DAS standard), and the lowest and last weekly averages.',
+  fn: (weekly_by_report) => {
+    const months = [...new Set(weekly_by_report.map(r => r.report_month))];
+    return months.map(m => {
+      const w = weekly_by_report.filter(r => r.report_month === m && r.in_report_month);
+      if (!w.length) return { report_month: m, weeks_in_month: 0, weeks_within_sop: 0, low_week_avg: null, low_week_end: '', last_week_avg: null, last_week_end: '' };
+      const low = w.reduce((a, r) => r.business_days_avg < a.business_days_avg ? r : a), last = w[w.length - 1];
+      return { report_month: m, weeks_in_month: w.length, weeks_within_sop: w.filter(r => r.business_days_avg <= 2).length,
+        low_week_avg: low.business_days_avg, low_week_end: low.last_day, last_week_avg: last.business_days_avg, last_week_end: last.last_day };
+    });
   }
 });
 
@@ -559,6 +615,35 @@ window.MKtheme = () => {
 </script>
 
 <script>
+/* ================= views: one section at a time, like the CCSP dashboard ================= */
+(() => {
+  const TABS = ['summary', 'ex-1', 'ex-2', 'ex-3', 'ex-4', 'notes'];
+  const btns = [...document.querySelectorAll('#chapters [data-tab]')];
+  const name = t => { if (t === 'summary') return 'Summary'; const b = btns.find(x => x.dataset.tab === t); return b ? (b.querySelector('.cn') ? 'Item ' + b.querySelector('.cn').textContent + ' · ' : '') + b.textContent.replace(/^\d+/, '').trim() : ''; };
+  const apply = (t) => {
+    btns.forEach(b => { const on = b.dataset.tab === t; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+    TABS.forEach(id => { const p = document.getElementById(id); if (p && p.classList.contains('mk-pane')) p.classList.toggle('on', id === t); });
+    document.getElementById('kpi-row').dataset.tab = t;
+    document.getElementById('kf-view').textContent = name(t);
+    document.getElementById('kf-view2').textContent = name(t);
+    document.getElementById('kpis').style.display = t === 'notes' ? 'none' : '';
+  };
+  document.getElementById('chapters').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-tab]'); if (!b) return;
+    const t = b.dataset.tab;
+    apply(t);                       // show the pane before charts redraw at their real width
+    try { dash.setLink(t); } catch (err) {}
+    dash.setParams({ tab: t });     // redraws every chart in the newly visible pane
+  });
+  const fromHash = location.hash.slice(1);
+  let first = true;
+  dash.onData(() => {
+    let t = dash.params().tab;
+    if (first) { first = false; if (TABS.includes(fromHash) && fromHash !== t) { apply(fromHash); dash.setParams({ tab: fromHash }); return; } }
+    apply(TABS.includes(t) ? t : 'summary');
+  });
+})();
+
 /* ================= reporting month: latest month with a completed monthly tab ================= */
 (() => {
   let linked = false;
@@ -569,7 +654,6 @@ window.MKtheme = () => {
     const rep = d.data.filter(r => r.status === 'reported');
     const def = (rep.length ? rep[rep.length - 1] : d.data[0]).month;
     if (MK.month() !== def) { dash.setParams({ month: def }); return; }
-    if (!linked) { linked = true; const t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
   });
 })()
 </script>
@@ -642,8 +726,6 @@ dash.onData(() => {
   const k5 = card('04b', 'Staff on the phones', 'staff_avg', R.staff_avg, f1, 'FTE per business day, average',
     R.staff_avg != null ? [chip('neu', ['Range ', mark(m, 'staff_min', f1(R.staff_min)), '–', mark(m, 'staff_max', f1(R.staff_max)), ' FTE'])] : [],
     R.staff_avg != null ? ['Counted on ', mark(m, 'staff_days', f0(R.staff_days)), ' business days'] : ['Daily staffing tracked from Aug 18'], 'Not tracked');
-  document.getElementById('kpi-row').replaceChildren(k1, k2, k3, k4, k5);
-
   /* key findings */
   const find = (k, h, parts) => { const f = el('div', 'f'); f.append(el('span', 'mk-mono k', k), el('p', 'h', h)); const b = el('p', 'b'); parts.filter(Boolean).forEach(p => b.append(typeof p === 'string' ? document.createTextNode(p) : p)); f.appendChild(b); return f; };
   const bdv = R.bd_monthly != null ? R.bd_monthly : R.bd_end;
@@ -658,8 +740,104 @@ dash.onData(() => {
   const f3c = find('Capacity', 'The constraint is capacity, not productivity.', [
     R.over_cap != null ? 'Callers booked ' : '', R.over_cap != null ? mark(m, 'over_cap', f0(R.over_cap)) : '', R.over_cap != null ? ' more callbacks than the team could return' : '',
     R.utilization != null ? ', while staff utilization ran at ' : '', R.utilization != null ? mark(m, 'utilization', pct(R.utilization)) : '', R.utilization != null ? ' against an 80% target.' : '.']);
-  [[f1c, MK.C.navy], [f2c, MK.C.gold], [f3c, MK.C.coral]].forEach(([f, a]) => f.style.setProperty('--acc', a));
-  document.getElementById('find-row').replaceChildren(f1c, f2c, f3c);
+
+  const accents = [MK.C.navy, MK.C.gold, MK.C.coral];
+  const TABV = ['summary', 'ex-1', 'ex-2', 'ex-3', 'ex-4', 'notes'];
+  const tab = TABV.includes(dash.params().tab) ? dash.params().tab : (TABV.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'summary');
+  const all = dash.data('month_summary').data, Pv = all[all.findIndex(x => x.month === m) - 1] || null;
+  const mp = (field, text) => Pv ? mark(Pv.month, field, text) : '';
+  const ws = dash.data('week_stats'), W = ws.status === 'ok' ? ws.data.find(x => x.report_month === m) : null;
+  const mw = (field, text, cls) => { const b = el('b', cls || null, text); b.dataset.source = 'week_stats'; b.dataset.field = field; b.dataset.where = 'report_month=' + m; return b; };
+  const cardW = (num, title, field, value, fmt, unit, status, context) => { const d = card(num, title, field, null, fmt, unit, status, context); if (value != null) { const v = mw(field, fmt(value), 'v'); v.style.fontWeight = '400'; d.replaceChild(v, d.querySelector('.v')); } return d; };
+  const sgn = d3.format('+,'), pctS = d3.format('.1%');
+  const status = v => chip(v > SOP ? 'bad' : 'ok', [v > SOP ? 'Above the 2-day standard' : 'Within the 2-day standard']);
+  let cards = [k1, k2, k3, k4, k5], finds = [f1c, f2c, f3c];
+
+  if (tab === 'ex-1') {
+    cards = [
+      card('01', 'Monthly average', 'bd_monthly', R.bd_monthly, f0, 'business days to return a call', R.bd_monthly != null ? [status(R.bd_monthly)] : [],
+        Pv && Pv.bd_monthly != null && R.bd_change != null ? [Pv.month_name + ': ', mp('bd_monthly', f0(Pv.bd_monthly)), ' days (', mark(m, 'bd_change', sgn(R.bd_change)), ')'] : ['First month of FY']),
+      card('01', 'Month-end reading', 'bd_end', R.bd_end, f0, R.bd_end != null ? `business days on ${fd(P(R.month_last_day))}` : '', R.bd_end != null ? [rising ? chip('bad', ['Rising since the clean-out']) : status(R.bd_end)] : [],
+        ['Longest-waiting caller, from the daily tracker (column T)'], 'Not tracked'),
+      cardW('01', 'Last week of the month', 'last_week_avg', W ? W.last_week_avg : null, f1, W && W.last_week_end ? `business days, week ending ${fd(P(W.last_week_end))}` : '', W && W.last_week_avg != null ? [status(W.last_week_avg)] : [],
+        ['Average of the daily readings that week']),
+      cardW('01', 'Weeks within standard', 'weeks_within_sop', W ? W.weeks_within_sop : null, f0, 'weeks averaging 2 business days or less', W ? [chip('neu', ['out of ', mw('weeks_in_month', f0(W.weeks_in_month)), ' weeks'])] : [],
+        W && W.low_week_avg != null ? ['Best week: ', mw('low_week_avg', f1(W.low_week_avg)), ` days (ending ${fd(P(W.low_week_end))})`] : [])
+    ];
+    finds = [
+      find('Against the standard', R.bd_monthly != null && R.bd_monthly > SOP ? `Callers wait ${vs(R.bd_monthly)} as long as the DAS standard allows.` : 'Callbacks meet the DAS standard on average.',
+        R.bd_monthly != null ? ['Callbacks averaged ', mark(m, 'bd_monthly', f0(R.bd_monthly)), ` business days in ${R.month_name} against a standard of 2.`, R.bd_change != null && R.bd_change < 0 ? ` That is better than ${Pv.month_name}’s ` : '', R.bd_change != null && R.bd_change < 0 ? mp('bd_monthly', f0(Pv.bd_monthly)) : '', R.bd_change != null && R.bd_change < 0 ? (R.cleanout_date ? ', largely because of the clean-out.' : '.') : ''] : []),
+      find('Direction', rising ? 'Waits are climbing again.' : 'Weekly waits held steady.',
+        W && W.low_week_avg != null ? ['Weekly averages went from a low of ', mw('low_week_avg', f1(W.low_week_avg)), ' days to ', mw('last_week_avg', f1(W.last_week_avg)), ' days by the last week of the month', rising ? ', as the queue refilled after the clean-out.' : '.'] : []),
+      find('Consistency', W && W.weeks_within_sop === 0 ? 'No week met the 2-day standard.' : 'Some weeks met the 2-day standard.',
+        W ? [mw('weeks_within_sop', f0(W.weeks_within_sop)), ' of ', mw('weeks_in_month', f0(W.weeks_in_month)), ` weeks in ${R.month_name} averaged 2 business days or less.`] : [])
+    ];
+  } else if (tab === 'ex-2') {
+    const up2 = R.still_change != null && R.still_change > 0;
+    cards = [
+      card('02', 'In callback list at month-end', 'still_in_list', R.still_in_list, f0, 'callbacks still waiting', R.still_change != null ? [chip(up2 ? 'bad' : 'ok', [up2 ? '▲ ' : '▼ ', mark(m, 'still_change', sgn(R.still_change)), ` vs ${prevAbbr}`])] : [],
+        Pv && Pv.still_in_list != null ? [Pv.month_name + ': ', mp('still_in_list', f0(Pv.still_in_list)), ' callbacks'] : []),
+      card('02', 'Not yet dialed', 'queue_end', R.queue_end, f0, R.queue_end != null ? `callers on ${fd(P(R.month_last_day))}` : '', [],
+        ['Point-in-time count from the daily tracker'], 'Not tracked'),
+      card('02', 'Low after clean-out', 'queue_low_after_cleanout', R.queue_low_after_cleanout, f0, R.cleanout_date ? `callers after ${fd(P(R.cleanout_date))}` : '', R.queue_low_after_cleanout != null && R.queue_end != null ? [chip('bad', ['Refilled to ', mark(m, 'queue_end', f0(R.queue_end))])] : [],
+        ['Old callbacks purged after hours'], 'None'),
+      card('02', 'New requests', 'booked_per_bday', R.booked_per_bday, f0, 'callbacks booked per business day', [], ['Column C, callbacks scheduled by caller'], 'Not tracked')
+    ];
+    finds = [
+      find('Backlog', up2 ? 'The backlog grew this month.' : 'The backlog shrank this month.',
+        R.still_change != null ? [mark(m, 'still_in_list', f0(R.still_in_list)), ' callbacks were still in the list at month-end, ', mark(m, 'still_change', sgn(R.still_change)), ` from ${Pv.month_name}.`] : []),
+      R.cleanout_date && R.queue_low_after_cleanout != null
+        ? find('Clean-out', 'The clean-out reset the queue, but it refilled.', ['The ', fd(P(R.cleanout_date)), ' clean-out cut the queue to ', mark(m, 'queue_low_after_cleanout', f0(R.queue_low_after_cleanout)), '; by ', fd(P(R.month_last_day)), ' it held ', mark(m, 'queue_end', f0(R.queue_end)), ' callers.'])
+        : find('Queue', 'Callers waiting at month-end.', R.queue_end != null ? [mark(m, 'queue_end', f0(R.queue_end)), ' callers had not yet been dialed.'] : []),
+      find('Inflow', 'Requests arrive faster than callbacks go out.',
+        R.booked_per_bday != null ? ['About ', mark(m, 'booked_per_bday', f0(R.booked_per_bday)), ' callbacks were booked each business day, and about ', mark(m, 'over_cap_per_day', f0(R.over_cap_per_day)), ' of them could not be returned that day.'] : [])
+    ];
+  } else if (tab === 'ex-3') {
+    cards = [
+      k3,
+      card('03', 'Calls handled', 'calls', R.calls, f0, 'callbacks, voicemail and outbound', R.calls_share != null ? [chip('neu', [mark(m, 'calls_share', pctS(R.calls_share)), ' of all work'])] : [],
+        R.callbacks_n != null ? ['Callbacks ', mark(m, 'callbacks_n', f0(R.callbacks_n)), ' · voicemail & outbound ', mark(m, 'vm_out_n', f0(R.vm_out_n))] : [], 'Pending'),
+      card('03', 'Web intakes', 'web_intakes', R.web_intakes, f0, 'online intake forms', R.web_change != null ? [chip('neu', [R.web_change >= 0 ? '▲ ' : '▼ ', mark(m, 'web_change', sgn(R.web_change)), ` vs ${prevAbbr}`])] : [],
+        Pv && Pv.web_intakes != null ? [Pv.month_name + ': ', mp('web_intakes', f0(Pv.web_intakes))] : [], 'Pending'),
+      card('03', 'Other channels', 'other_channels', R.other_channels, f0, 'APS, email, walk-ins, MAC', [],
+        R.aps != null ? ['APS ', mark(m, 'aps', f0(R.aps)), ' · email ', mark(m, 'emails', f0(R.emails)), ' · walk-ins ', mark(m, 'walk_ins', f0(R.walk_ins)), ' · MAC ', mark(m, 'mac', f0(R.mac))] : [], 'Pending')
+    ];
+    finds = [
+      find('Volume', R.change_pct_bday != null && R.change_pct_bday < 0 ? 'Completed work dipped this month.' : 'Completed work rose this month.',
+        R.change_pct_bday != null ? ['The team handled about ', mark(m, 'interactions_per_bday', f0(R.interactions_per_bday)), ' interactions per business day, ', mark(m, 'change_pct_bday', spct(R.change_pct_bday)), ` from ${Pv.month_name}.`] : []),
+      find('Mix', R.callbacks_change > 0 && R.vm_out_change < 0 ? 'The mix shifted toward callbacks.' : 'The mix of work held steady.',
+        R.callbacks_change != null ? ['Callbacks changed by ', mark(m, 'callbacks_change', sgn(R.callbacks_change)), ' and voicemail and outbound calls by ', mark(m, 'vm_out_change', sgn(R.vm_out_change)), ` compared with ${Pv.month_name}.`] : []),
+      find('Share', 'Calls are most of the work.',
+        R.calls_share != null ? ['Calls made up ', mark(m, 'calls_share', pctS(R.calls_share)), ' of all interactions; web intakes added ', mark(m, 'web_intakes', f0(R.web_intakes)), ' and other channels ', mark(m, 'other_channels', f0(R.other_channels)), '.'] : [])
+    ];
+  } else if (tab === 'ex-4') {
+    cards = [
+      k4, k5,
+      card('04', 'Callbacks returned', 'accept_rate', R.accept_rate, pct, 'of callbacks booked', R.accept_rate != null ? [chip(R.accept_rate < 0.5 ? 'bad' : 'neu', [R.accept_rate < 0.5 ? 'Fewer than half' : 'Most'])] : [],
+        ['Accepted ÷ scheduled for the month']),
+      card('04', 'Staff utilization', 'utilization', R.utilization, pct, 'team average, target 80%', R.utilization != null ? [chip(R.utilization >= 0.8 ? 'ok' : 'bad', [R.utilization >= 0.8 ? 'Above target' : 'Below target'])] : [],
+        R.mde != null ? ['Quality ', mark(m, 'mde', pct(R.mde)), ' · satisfaction ', mark(m, 'post_call_survey', pct(R.post_call_survey))] : [], 'Pending')
+    ];
+    const staffUp = Pv && Pv.staff_avg != null && R.staff_avg != null && R.staff_avg > Pv.staff_avg;
+    finds = [
+      find('Every day', R.over_cap_min_day != null && R.over_cap_min_day > 0 ? 'Demand exceeded capacity every business day.' : 'Capacity met demand on some days.',
+        R.over_cap_min_day != null ? ['Even the lightest day, ', fd(P(R.over_cap_min_date)), ', added ', mark(m, 'over_cap_min_day', f0(R.over_cap_min_day)), ' callers the team could not reach.'] : []),
+      find('Staffing', staffUp ? 'More staff helped, but did not close the gap.' : 'Staffing and the gap moved together.',
+        Pv && Pv.staff_avg != null && R.staff_avg != null ? ['Staff on the phones went from ', mp('staff_avg', f1(Pv.staff_avg)), ' to ', mark(m, 'staff_avg', f1(R.staff_avg)), ' FTE; calls beyond capacity went from ', mp('over_cap_per_day', f0(Pv.over_cap_per_day)), ' to ', mark(m, 'over_cap_per_day', f0(R.over_cap_per_day)), ' per business day.'] : []),
+      find('Effort', R.utilization != null && R.utilization >= 0.8 ? 'Staff are working above target.' : 'Staff utilization is below target.',
+        R.utilization != null ? ['Utilization ran at ', mark(m, 'utilization', pct(R.utilization)), ' against an 80% target, with ', mark(m, 'mde', pct(R.mde)), ' quality and ', mark(m, 'post_call_survey', pct(R.post_call_survey)), ' caller satisfaction.'] : [])
+    ];
+  }
+  const pal = [MK.C.navy, MK.C.blue, MK.C.teal, MK.C.coral, MK.C.gold];
+  cards.forEach(k => k.style.setProperty('--acc', MK.C.navy));
+  document.getElementById('kpi-row').replaceChildren(...cards);
+  /* findings read left to right: context (navy) → what changed (gold) → what needs attention (red; teal when the news is good) */
+  const tones = [MK.C.navy, MK.C.gold, MK.C.coral];
+  if (tab === 'ex-1') tones[2] = W && W.weeks_within_sop === 0 ? MK.C.coral : MK.C.teal;
+  if (tab === 'ex-3') { finds = [finds[2], finds[1], finds[0]]; tones[2] = R.change_pct_bday != null && R.change_pct_bday < 0 ? MK.C.coral : MK.C.teal; }
+  if (tab === 'ex-4') { finds = [finds[2], finds[1], finds[0]]; tones[2] = R.over_cap_min_day != null && R.over_cap_min_day > 0 ? MK.C.coral : MK.C.teal; }
+  finds.forEach((f, i) => f.style.setProperty('--acc', tones[i]));
+  document.getElementById('find-row').replaceChildren(...finds);
 
   /* action titles */
   put('t1', R.bd_monthly != null
@@ -702,12 +880,12 @@ dash.onData(() => {
     note([t('Reporting period. '), 'FY2027 runs July 2026 through June 2027. The reporting month is the latest month with a completed monthly tab. Every figure, chart and table covers July 1 through the end of that month; data recorded after the month closes appears once that month is reported.']),
     note([t('Sources. '), 'Monthly figures come from the ADRC Dashboard FY2027 workbook (one tab per month). Weekly and daily detail come from the Queue Pivot Project tracker, which begins Aug 18, 2026. Weeks run Monday to Friday and are labeled by their Friday.']),
     note([t('Business days. '), 'Every day count, rate and average uses business days: weekdays less ARC holidays (Independence Day observed Jul 3, Labor Day, Veterans Day, Thanksgiving and the day after, Christmas Eve and Christmas Day, New Year’s Day, Martin Luther King Jr. Day, Memorial Day and Juneteenth observed Jun 18). ', mark(m, 'business_days', f0(R.business_days)), ` business days fell in ${R.month_name}. Per-business-day figures divide a month’s total by its business days; tracker averages cover only the business days the tracker recorded. The DAS standard of promptness is likewise measured in business days.`]),
-    note([t('Key figure cards. '), 'Each card shows the monthly figure in large type, a status tag beneath it (red flags a concern, green an improvement, grey a neutral fact), and a supporting detail line, usually the month-end reading from the queue tracker. Rates such as “per business day” divide the month’s total by its business days.']),
-    note([t('Exhibit 1, days to return a call. '), 'The monthly chart shows the monthly tab’s average business days to return a call; the gold bar is the reporting month, navy bars are earlier months, and dashed outlines are months not yet reported. The red dashed line is the DAS standard of 2 business days. The weekly chart averages the tracker’s daily reading of how long the oldest waiting callback has been in the queue (column T); navy weeks are above the standard, teal weeks are at or below it, and shaded weeks fall in the reporting month. Because one is an average wait and the other tracks the oldest callback, the two can differ.']),
-    note([t('Exhibit 2, callbacks waiting. '), 'The monthly chart shows callbacks not serviced but still in the callback list at month-end, as reported on the monthly tab. In the weekly chart, the navy line is a point-in-time count of callbacks not yet dialed on the last reported day of each week (column Q), and the grey bars are new callbacks booked per business day that week (column C, right axis), so four-day holiday weeks and the partial last week compare fairly with full weeks. The two counts measure different things', both ? ' (' : '', both ? mark(m, 'still_in_list', f0(R.still_in_list)) : '', both ? ` in the callback list at the end of ${mon}, against ` : '', both ? mark(m, 'queue_end', f0(R.queue_end)) : '', both ? ` not yet dialed on ${fd(P(R.month_last_day))})` : '', '.']),
-    note([t('Exhibit 3, interactions handled. '), 'Each bar stacks the month’s interactions by type: callbacks (navy), voicemail and outbound calls (deep teal-blue), web intakes (teal) and other channels (slate: APS referrals, information emails, walk-ins and Memory Assessment Clinic referrals). The reporting month is shown in full color and earlier months are muted. Calls use the monthly tab’s total calls serviced so months compare on one basis', R.tracker_calls != null && R.calls != null ? `; for ${mon}, the tracker’s columns J–L sum to ` : '', R.tracker_calls != null && R.calls != null ? mark(m, 'tracker_calls', f0(R.tracker_calls)) : '', R.tracker_calls != null && R.calls != null ? ' against ' : '', R.tracker_calls != null && R.calls != null ? mark(m, 'calls', f0(R.calls)) : '', R.tracker_calls != null && R.calls != null ? ' on the monthly tab' : '', R.reported_calls != null ? ', and the A&IS reported figure, which excludes BRI, resource specialist and transfer queues, is ' : '', R.reported_calls != null ? mark(m, 'reported_calls', f0(R.reported_calls)) : '', '. In the table, the highlighted column is the reporting month, the FYTD column adds every month to date (its gold bar shows each type’s share of all interactions; for interactions per business day it is the FYTD total divided by FYTD business days), and the last column shows the change from the prior month, ▲ in teal for an increase and ▼ in red for a decrease.']),
-    note([t('Exhibit 4, calls beyond capacity and staffing. '), 'Calls beyond capacity are callbacks callers booked minus callbacks staff reached and the caller accepted, so they include callers who did not answer. The monthly chart divides the monthly tab’s scheduled-minus-accepted total by the month’s business days, with a teal line for the average FTE logged into the phone queue each business day (right axis). The business-day chart uses tracker column E, shown as a positive count, with one bar per business day: deep teal-blue bars fall in the reporting month and lighter bars are earlier days, the navy line is FTE in the queue (gaps are days with no staff count), and gold markers label key events.']),
-    note([t('Exhibit 5, staff performance context. '), 'Each measure is a team average from the monthly tab. The bar under utilization shows the gold 80% target mark; the bars under MDE accuracy and post-call satisfaction run to 100%. Per-staff call averages are left out because staff rotate between the callback queue, screenings and web intakes.']),
+    note([t('Key figures and findings. '), 'Each view opens with its own key figure cards and findings. Each card shows the monthly figure in large type, a status tag beneath it (red flags a concern, green an improvement, grey a neutral fact), and a supporting detail line, usually the month-end reading from the queue tracker. Rates such as “per business day” divide the month’s total by its business days.']),
+    note([t('Item 1, days to return a call. '), 'The monthly chart shows the monthly tab’s average business days to return a call; the gold bar is the reporting month, navy bars are earlier months, and dashed outlines are months not yet reported. The red dashed line is the DAS standard of 2 business days. The weekly chart averages the tracker’s daily reading of how long the oldest waiting callback has been in the queue (column T); navy weeks are above the standard, teal weeks are at or below it, and shaded weeks fall in the reporting month. Because one is an average wait and the other tracks the oldest callback, the two can differ.']),
+    note([t('Item 2, calls in the P28 queue. '), 'The monthly chart shows callbacks not serviced but still in the callback list at month-end, as reported on the monthly tab. In the weekly chart, the navy line is a point-in-time count of callbacks not yet dialed on the last reported day of each week (column Q), and the grey bars are new callbacks booked per business day that week (column C, right axis), so four-day holiday weeks and the partial last week compare fairly with full weeks. The two counts measure different things', both ? ' (' : '', both ? mark(m, 'still_in_list', f0(R.still_in_list)) : '', both ? ` in the callback list at the end of ${mon}, against ` : '', both ? mark(m, 'queue_end', f0(R.queue_end)) : '', both ? ` not yet dialed on ${fd(P(R.month_last_day))})` : '', '.']),
+    note([t('Item 3, interactions handled. '), 'Each bar stacks the month’s interactions by type: callbacks (navy), voicemail and outbound calls (deep teal-blue), web intakes (teal) and other channels (slate: APS referrals, information emails, walk-ins and Memory Assessment Clinic referrals). The reporting month is shown in full color and earlier months are muted. Calls use the monthly tab’s total calls serviced so months compare on one basis', R.tracker_calls != null && R.calls != null ? `; for ${mon}, the tracker’s columns J–L sum to ` : '', R.tracker_calls != null && R.calls != null ? mark(m, 'tracker_calls', f0(R.tracker_calls)) : '', R.tracker_calls != null && R.calls != null ? ' against ' : '', R.tracker_calls != null && R.calls != null ? mark(m, 'calls', f0(R.calls)) : '', R.tracker_calls != null && R.calls != null ? ' on the monthly tab' : '', R.reported_calls != null ? ', and the A&IS reported figure, which excludes BRI, resource specialist and transfer queues, is ' : '', R.reported_calls != null ? mark(m, 'reported_calls', f0(R.reported_calls)) : '', '. In the table, the highlighted column is the reporting month, the FYTD column adds every month to date (its gold bar shows each type’s share of all interactions; for interactions per business day it is the FYTD total divided by FYTD business days), and the last column shows the change from the prior month, ▲ in teal for an increase and ▼ in red for a decrease.']),
+    note([t('Item 4, calls over capacity and FTEs. '), 'Calls beyond capacity are callbacks callers booked minus callbacks staff reached and the caller accepted, so they include callers who did not answer. The monthly chart divides the monthly tab’s scheduled-minus-accepted total by the month’s business days, with a teal line for the average FTE logged into the phone queue each business day (right axis). The business-day chart uses tracker column E, shown as a positive count, with one bar per business day: deep teal-blue bars fall in the reporting month and lighter bars are earlier days, the navy line is FTE in the queue (gaps are days with no staff count), and gold markers label key events.']),
+    note([t('Item 4, staff workload and quality. '), 'Each measure is a team average from the monthly tab. The bar under utilization shows the gold 80% target mark; the bars under MDE accuracy and post-call satisfaction run to 100%. Per-staff call averages are left out because staff rotate between the callback queue, screenings and web intakes.']),
     note([t('Clean-out. '), 'Old callbacks were purged after hours on Sept 8, 2026 and callers received a dialer message, so the queue and wait reset that day. Comparisons across that date reflect the reset, not a change in pace.']),
     note([t('Coverage. '), 'The first tracked week starts on a Tuesday and the Labor Day week has four days; staff counts were not recorded on several August Fridays. Staff names are not shown.'])
   );
