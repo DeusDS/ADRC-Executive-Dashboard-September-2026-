@@ -121,6 +121,26 @@ html, body { margin: 0; padding: 0; background: var(--color-bg); }
 .mk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); gap: 1rem; }
 .mk-card { background: var(--mk-card); border: 1px solid var(--mk-line); padding: 1.15rem 1.25rem 1rem; display: flex; flex-direction: column; gap: .45rem; min-width: 0; }
 .mk-card h3 { margin: 0; font-size: 1rem; line-height: 1.3; font-weight: 700; letter-spacing: -.005em; }
+.mk-hl { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); margin: .5rem 0 .6rem; border-top: 2px solid var(--mk-navy); }
+.mk-hl .c { padding: .7rem .8rem .2rem 0; display: flex; flex-direction: column; gap: .15rem; }
+.mk-hl .c + .c { border-left: 1px solid var(--mk-line); padding-left: .8rem; }
+.mk-hl .k { color: var(--mk-gold); font-size: .64rem; }
+.mk-hl .v { font-family: var(--font-anthropic-serif); font-size: 1.45rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.mk-hl .v.up { color: var(--mk-teal); } .mk-hl .v.down { color: var(--mk-coral); }
+.mk-hl .n { font-size: var(--cds-font-size-caption); color: var(--mk-muted); line-height: 1.4; }
+.mk-mix { margin-top: .35rem; margin-bottom: .6rem; border-top: 1px solid var(--mk-line); padding-top: .8rem; }
+.mk-mix .hk { color: var(--mk-gold); display: block; margin-bottom: .55rem; }
+.mk-mix .bar { display: flex; height: 26px; overflow: hidden; }
+.mk-mix .bar span { display: flex; align-items: center; justify-content: center; color: #fff; font-size: .72rem; font-weight: 700; min-width: 0; white-space: nowrap; overflow: hidden; }
+.mk-mix .rows { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 7.25rem), 1fr)); gap: .6rem .9rem; margin-top: .75rem; }
+.mk-mix .r { display: grid; grid-template-columns: .7rem 1fr; column-gap: .45rem; row-gap: .1rem; align-items: center; }
+.mk-mix .r .nm { font-size: var(--cds-font-size-caption); color: var(--mk-muted); }
+.mk-mix .r .vl { grid-column: 2; font-variant-numeric: tabular-nums; font-size: var(--cds-font-size-body); }
+.mk-mix .r .vl b { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: 1.25rem; margin-right: .3rem; }
+.mk-mix .r .vl span { font-size: var(--cds-font-size-caption); color: var(--mk-muted); }
+.mk-mix .r .vl span b { font-family: var(--font-anthropic-sans); font-size: var(--cds-font-size-caption); font-weight: 600; color: var(--mk-muted); margin: 0; }
+.mk-mix .ft { margin-top: .7rem; font-size: var(--cds-font-size-caption); color: var(--mk-muted); line-height: 1.5; }
+.mk-mix .ft b { color: var(--mk-ink); }
 .mk-howto { margin-top: .35rem; background: var(--mk-blue-t); border-left: 3px solid var(--mk-gold); padding: .75rem .95rem .8rem; }
 .mk-howto .hk { color: var(--mk-gold); display: block; margin-bottom: .4rem; }
 .mk-howto ul { margin: 0; padding-left: 1.05rem; display: flex; flex-direction: column; gap: .35rem; font-size: var(--cds-font-size-caption); line-height: 1.55; color: var(--mk-ink); }
@@ -239,9 +259,11 @@ html, body { margin: 0; padding: 0; background: var(--color-bg); }
         <div class="mk-card"><h3>Work completed each month, by type</h3><p class="d">Every completed contact, stacked by type; the number on top is the month’s total. The reporting month is shown in full color, earlier months are faded.</p>
           <ul class="mk-key"><li><span class="mk-sw" style="background:var(--mk-navy)"></span>Callbacks</li><li><span class="mk-sw" style="background:var(--mk-blue)"></span>Voicemail &amp; outbound</li><li><span class="mk-sw" style="background:var(--mk-teal)"></span>Web intakes</li><li><span class="mk-sw" style="background:var(--mk-cyan)"></span>Other channels</li></ul>
           <div class="mk-chart" id="c3m" data-source="interactions"></div>
+          <div class="mk-mix" id="mix3" data-source="interactions"><span class="mk-mono hk" id="mix3-h">Mix of work</span><div class="bar" id="mix3-bar"></div><div class="rows" id="mix3-rows"></div><p class="ft" id="mix3-ft"></p></div>
           <p class="src">Source: ADRC Dashboard FY2027 workbook, monthly tabs (total calls serviced incl. callbacks, voicemails and outbound; ADRC intake section).</p></div>
         <div class="mk-card"><h3>Work completed by type, with year-to-date totals</h3><p class="d">Exact counts for each month, the fiscal-year-to-date (FYTD) total and the change from the prior month (▲ up, ▼ down). The last two rows adjust for month length: business days, and work completed per business day.</p>
           <div class="mk-tablewrap"><table class="mk-table" id="tbl-int" data-source="interactions_table" data-row-key="category"><thead></thead><tbody></tbody></table></div>
+          <div class="mk-hl" id="tbl-hl" data-source="interactions_table"></div>
           <p class="src">Voicemail and outbound = total calls serviced − callbacks serviced. Source: ADRC Dashboard FY2027 workbook, monthly tabs.</p></div>
       </div>
     </section>
@@ -419,14 +441,16 @@ dash.calc('daily_capacity', {
 dash.calc('interactions', {
   inputs: ['adrc_monthly'],
   title: 'Interactions by month',
-  description: 'Monthly interactions: callbacks, voicemail and outbound (total calls − callbacks), web intakes, and other channels (APS, emails, walk-ins, MAC).',
+  description: 'Monthly interactions: callbacks, voicemail and outbound (total calls − callbacks), web intakes, and other channels (APS, emails, walk-ins, MAC), with each type’s share of the month’s total.',
   fn: (adrc_monthly) => adrc_monthly.map(r => {
     const HOL = ['2026-07-03', '2026-09-07', '2026-11-11', '2026-11-26', '2026-11-27', '2026-12-24', '2026-12-25', '2027-01-01', '2027-01-18', '2027-05-31', '2027-06-18'];
     const bdays = (m) => { const y = Number(m.slice(0, 4)), mo = Number(m.slice(5, 7)); let c = 0; for (let d = new Date(Date.UTC(y, mo - 1, 1)); d.getUTCMonth() === mo - 1; d.setUTCDate(d.getUTCDate() + 1)) { const w = d.getUTCDay(), iso = d.toISOString().slice(0, 10); if (w > 0 && w < 6 && !HOL.includes(iso)) c++; } return c; };
     const n = k => Number(r[k]);
     const other = n('aps_referrals') + n('info_emails') + n('walk_ins') + n('mac_referrals');
     const total = n('calls_serviced') + n('web_intakes') + other;
-    return { month: r.month, callbacks: n('callbacks_serviced'), voicemail_outbound: n('calls_serviced') - n('callbacks_serviced'), web_intakes: n('web_intakes'), other_channels: other, total, business_days: bdays(r.month), per_bday: Math.round(total / bdays(r.month)) };
+    const sh = v => Math.round(v / total * 1000) / 1000;
+    return { month: r.month, callbacks: n('callbacks_serviced'), voicemail_outbound: n('calls_serviced') - n('callbacks_serviced'), web_intakes: n('web_intakes'), other_channels: other, total, business_days: bdays(r.month), per_bday: Math.round(total / bdays(r.month)),
+      callbacks_share: sh(n('callbacks_serviced')), voicemail_outbound_share: sh(n('calls_serviced') - n('callbacks_serviced')), web_intakes_share: sh(n('web_intakes')), other_channels_share: sh(other), calls_share: sh(n('calls_serviced')) };
   })
 });
 
@@ -842,6 +866,33 @@ dash.onData(() => {
       .on('mousemove', (e, r) => { const [mx, my] = d3.pointer(e, host); tp.show(d3.utcFormat('%B %Y')(MK.P(r.month + '-01')), keys.map(([k, n], i) => [colors[i], n, MK.f0(r[k])]).concat([[null, 'Total', MK.f0(r.total)], [null, `Per business day (${r.business_days} days)`, MK.f0(r.per_bday)]]), '', mx, my); })
       .on('mouseleave', () => tp.hide());
   }
+  /* mix of work for the reporting month */
+  (() => {
+    const bar = document.getElementById('mix3-bar'), rowsEl = document.getElementById('mix3-rows'), ft = document.getElementById('mix3-ft');
+    bar.replaceChildren(); rowsEl.replaceChildren(); ft.replaceChildren();
+    const box = document.getElementById('mix3');
+    const d = dash.data('interactions');
+    const r = d.status === 'ok' && sel ? d.data.find(x => x.month === sel) : null;
+    if (!r) { box.style.display = 'none'; return; }
+    box.style.display = '';
+    const label = d3.utcFormat('%B')(MK.P(sel + '-01'));
+    document.getElementById('mix3-h').textContent = `${label} mix · share of all interactions`;
+    const mk = (field, text) => { const b = MK.el('b', null, text); b.dataset.source = 'interactions'; b.dataset.field = field; b.dataset.where = 'month=' + sel; return b; };
+    const pct0 = d3.format('.0%');
+    keys.forEach(([k, n], i) => {
+      const seg = MK.el('span', null, r[k + '_share'] >= 0.08 ? pct0(r[k + '_share']) : '');
+      seg.style.width = (r[k + '_share'] * 100) + '%'; seg.style.background = colors[i];
+      if (i === 0) seg.style.color = 'var(--mk-card)';
+      seg.title = `${n}: ${pct0(r[k + '_share'])}`;
+      bar.appendChild(seg);
+      const row = MK.el('div', 'r'); const sw = MK.el('span', 'mk-sw'); sw.style.background = colors[i];
+      const vl = MK.el('span', 'vl'); vl.append(mk(k, MK.f0(r[k])), (() => { const p = MK.el('span'); p.append(mk(k + '_share', d3.format('.1%')(r[k + '_share']))); return p; })());
+      row.append(sw, MK.el('span', 'nm', n), vl);
+      rowsEl.appendChild(row);
+    });
+    ft.append('Calls (callbacks plus voicemail and outbound) made up ', mk('calls_share', d3.format('.1%')(r.calls_share)), ` of all work in ${label}, about `, mk('per_bday', MK.f0(r.per_bday)), ' interactions per business day across ', mk('business_days', MK.f0(r.business_days)), ' business days.');
+  })();
+
   /* table: months through the reporting month, FYTD, change */
   const tbl = document.getElementById('tbl-int');
   const thead = tbl.querySelector('thead'), tbody = tbl.querySelector('tbody');
@@ -872,11 +923,42 @@ dash.onData(() => {
     }
     tbody.appendChild(row);
   });
+  /* highlights under the table: biggest increase, biggest decrease, FYTD pace */
+  const hl = document.getElementById('tbl-hl'); hl.replaceChildren();
+  if (!last) return;
+  const k = last.slice(2), prevCol = cols.length > 1 ? cols[cols.length - 2] : null;
+  const leaf = t.data.filter(r => ['Callbacks', 'Voicemail and outbound', 'Web intakes', 'APS referrals', 'Information emails', 'Walk-ins', 'Memory Assessment Clinic referrals'].includes(r.category) && r['chg_' + k] != null);
+  const mon = c => d3.utcFormat('%b')(MK.P(c.slice(2).replace('_', '-') + '-01'));
+  const mk = (cat, field, text, cls) => { const b = MK.el('b', 'v' + (cls ? ' ' + cls : ''), text); b.dataset.source = 'interactions_table'; b.dataset.field = field; b.dataset.where = 'category=' + cat; return b; };
+  const cell = (key, val, note) => { const c = MK.el('div', 'c'); c.append(MK.el('span', 'mk-mono k', key), val, MK.el('span', 'n', note)); hl.appendChild(c); };
+  const sgn = d3.format('+,');
+  if (leaf.length && prevCol) {
+    const up = leaf.reduce((a, b) => b['chg_' + k] > a['chg_' + k] ? b : a), dn = leaf.reduce((a, b) => b['chg_' + k] < a['chg_' + k] ? b : a);
+    if (up['chg_' + k] > 0) cell('Largest increase', mk(up.category, 'chg_' + k, sgn(up['chg_' + k]), 'up'), `${up.category} vs ${mon(prevCol)}`);
+    if (dn['chg_' + k] < 0) cell('Largest decrease', mk(dn.category, 'chg_' + k, sgn(dn['chg_' + k]), 'down'), `${dn.category} vs ${mon(prevCol)}`);
+  }
+  const rate = t.data.find(r => r.category === 'Interactions per business day'), days = t.data.find(r => r.category === 'Business days');
+  if (rate && days) { const n = MK.el('span', 'n'); n.append('per business day over ', mk('Business days', 'ytd_' + k, MK.f0(days['ytd_' + k])), ' business days'); n.querySelector('b').className = ''; const c = MK.el('div', 'c'); c.append(MK.el('span', 'mk-mono k', 'FYTD pace'), mk('Interactions per business day', 'ytd_' + k, MK.f0(rate['ytd_' + k])), n); hl.appendChild(c); }
 });
 </script>
 
 <script>
 /* ================= how-to guide for the business-day capacity chart ================= */
+window.MKhowtoInt = (R, rows, prev) => {
+  const ul = document.getElementById('howto-ilist'); ul.replaceChildren();
+  const { el, f0, pct } = MK;
+  const li = (parts) => { const l = el('li'); parts.filter(Boolean).forEach(p => l.append(typeof p === 'string' ? document.createTextNode(p) : p)); ul.appendChild(l); };
+  const mi = (m, field, text) => { const b = el('b', null, text); b.dataset.source = 'interactions'; b.dataset.field = field; b.dataset.where = 'month=' + m; return b; };
+  const ms = (m, field, text) => { const b = el('b', null, text); b.dataset.source = 'month_summary'; b.dataset.field = field; b.dataset.where = 'month=' + m; return b; };
+  const r = rows.find(x => x.month === R.month);
+  if (!r) { document.getElementById('howto-int').style.display = 'none'; return; }
+  document.getElementById('howto-int').style.display = '';
+  li(['Each bar stacks one month’s completed work by type, and the number on top is the total. Example: in ', R.month_name, ', ', mi(r.month, 'callbacks', f0(r.callbacks)), ' callbacks + ', mi(r.month, 'voicemail_outbound', f0(r.voicemail_outbound)), ' voicemail and outbound + ', mi(r.month, 'web_intakes', f0(r.web_intakes)), ' web intakes + ', mi(r.month, 'other_channels', f0(r.other_channels)), ' other = ', mi(r.month, 'total', f0(r.total)), '.']);
+  const callShare = (r.callbacks + r.voicemail_outbound) / r.total;
+  li(['Phone work (the two blue layers) is about ', el('b', null, d3.format('.0%')(callShare)), ' of the total; web intakes are the largest non-phone channel, and the thin top layer covers APS referrals, emails, walk-ins and Memory Assessment Clinic referrals.']);
+  if (prev && R.interactions_per_bday != null && prev.interactions_per_bday != null) li(['Months have different numbers of business days, so compare work per business day: ', ms(R.month, 'interactions_per_bday', f0(R.interactions_per_bday)), ` in ${R.month_name} against `, ms(prev.month, 'interactions_per_bday', f0(prev.interactions_per_bday)), ` in ${prev.month_name} (last row of the table).`]);
+};
+
 window.MKhowtoMonthly = (R, all) => {
   const ul = document.getElementById('howto-mlist'); ul.replaceChildren();
   const { el, f0, f1 } = MK;
