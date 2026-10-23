@@ -165,7 +165,7 @@ html, body { margin: 0; padding: 0; background: var(--color-bg); }
 .mk-card .d { font-size: var(--cds-font-size-caption); color: var(--mk-muted); line-height: 1.5; }
 .mk-card .src { font-size: .72rem; color: var(--mk-muted); line-height: 1.5; border-top: 1px solid var(--mk-line); padding-top: .5rem; margin-top: auto; }
 .mk-card .mk-howto + .src, .mk-card .mk-chart + .src, .mk-card .mk-tablewrap + .src, .mk-card .mk-ctx + .src { margin-top: auto; }
-.mk-card > .mk-howto { margin-bottom: .6rem; }
+.mk-card > .mk-howto { margin-bottom: .6rem; flex: 1 1 auto; }
 .mk-key { display: flex; flex-wrap: wrap; gap: .3rem 1.1rem; font-size: var(--cds-font-size-caption); color: var(--mk-muted); margin: .1rem 0 0; padding: 0; list-style: none; }
 .mk-key li { display: flex; align-items: center; gap: .4rem; }
 .mk-sw { width: .72rem; height: .72rem; display: inline-block; }
@@ -299,13 +299,13 @@ html, body { margin: 0; padding: 0; background: var(--color-bg); }
     <section id="ex-4" class="mk-pane" role="tabpanel">
       <div class="mk-sech"><span class="no">04</span><div class="tt"><span class="mk-mono k">Item 04 · Capacity &amp; staffing<span class="kq">Can staff keep up?</span></span><h2 id="t4" data-source="month_summary">—</h2></div></div>
       <div class="mk-grid">
-        <div class="mk-card"><h3>Calls exceeding capacity vs. FTEs on the phone queue, by month</h3><p class="d">Bars: average calls exceeding capacity per business day, meaning callbacks booked that the team could not complete. Teal line: average staff on the phones (FTE, right scale). Gold is the reporting month. Lower bars are better.</p>
+        <div class="mk-card"><h3>Calls exceeding capacity vs. FTEs on the phone queue, by month</h3><p class="d">One bar per month: average calls exceeding capacity per business day. Teal line: average FTEs on the phone queue (right scale). Lower bars are better.</p>
           <ul class="mk-key"><li><span class="mk-sw" style="background:var(--mk-gold)"></span>Reporting month</li><li><span class="mk-sw" style="background:var(--mk-navy)"></span>Earlier months</li><li><span class="mk-sw line" style="background:var(--mk-teal)"></span>FTEs on the phone queue (right scale)</li></ul>
           <div class="mk-chart" id="c4m" data-source="month_summary"></div>
           <div class="mk-howto" id="howto-capm"><span class="mk-mono hk">How to read this chart</span><ul id="howto-mlist"></ul></div>
-          <p class="src">Source: ADRC Dashboard FY2027 workbook (callbacks scheduled, accepted); Queue Pivot Project workbook, column I.</p></div>
-        <div class="mk-card"><h3>Calls exceeding capacity vs. FTEs on the phone queue, each business day</h3><p class="d">One bar per business day through <span class="wk-end">—</span>; the navy line is staff on the phones (FTE, right scale). The guide below explains how to read it.</p>
-          <ul class="mk-key"><li><span class="mk-sw" style="background:var(--mk-blue)"></span>Calls exceeding capacity, reporting month</li><li><span class="mk-sw" style="background:var(--mk-cyan)"></span>Earlier days</li><li><span class="mk-sw line" style="background:var(--mk-navy)"></span>FTEs on the phone queue (right scale)</li></ul>
+          <p class="src">Source: ADRC Dashboard FY2027 monthly tabs; Queue Pivot Project workbook, column I.</p></div>
+        <div class="mk-card"><h3>Calls exceeding capacity vs. FTEs on the phone queue, each business day</h3><p class="d">One bar per business day through <span class="wk-end">—</span>. Navy line: FTEs on the phone queue (right scale). Lower bars are better.</p>
+          <ul class="mk-key"><li><span class="mk-sw" style="background:var(--mk-blue)"></span>Reporting month</li><li><span class="mk-sw" style="background:var(--mk-cyan)"></span>Earlier days</li><li><span class="mk-sw line" style="background:var(--mk-navy)"></span>FTEs on the phone queue (right scale)</li></ul>
           <div class="mk-chart" id="c4d" data-source="daily_capacity"></div>
           <div class="mk-howto" id="howto-cap"><span class="mk-mono hk">How to read this chart</span><ul id="howto-list"></ul></div>
           <p class="src">Source: Queue Pivot Project workbook, columns E and I.</p></div>
@@ -382,6 +382,7 @@ dash.calc('month_summary', {
         over_cap: over,
         business_days: bd,
         business_days_fytd: total != null ? fytdDays : null,
+        over_cap_fytd_per_bday: total != null ? Math.round(FY.slice(0, i + 1).reduce((a, k) => { const X = adrc_monthly.find(r => r.month === k); return a + (X ? n(X.callbacks_scheduled) - n(X.callbacks_accepted) : 0); }, 0) / fytdDays) : null,
         over_cap_per_day: over == null ? null : Math.round(over / (M ? bd : (T.length || bd))),
         interactions_per_bday: total != null ? Math.round(total / bd) : null,
         interactions_per_bday_prev: P ? Math.round(tot(P) / bdays(FY[i - 1])) : null,
@@ -406,6 +407,7 @@ dash.calc('month_summary', {
         web_intakes: M ? n(M.web_intakes) : null,
         reported_calls: M ? n(M.calls_reported) : null,
         tracker_calls: covered ? sum(T, 'serviced_callbacks') + sum(T, 'serviced_voicemail') + sum(T, 'serviced_outbound') : null,
+        over_cap_fytd: total != null ? FY.slice(0, i + 1).reduce((a, k) => { const X = adrc_monthly.find(r => r.month === k); return a + (X ? n(X.callbacks_scheduled) - n(X.callbacks_accepted) : 0); }, 0) : null,
         bd_change: M && P && P.business_sop_days != null ? n(M.business_sop_days) - n(P.business_sop_days) : null,
         booked_per_bday: covered ? Math.round(sum(T, 'callbacks_scheduled') / T.length) : null,
         aps: M ? n(M.aps_referrals) : null,
@@ -898,7 +900,7 @@ dash.onData(() => {
 <script>
 /* ================= monthly FY chart (12 months) ================= */
 window.MKmonthly = (host, rows, opts) => {
-  const W = Math.max(host.clientWidth, 280), H = 260;
+  const W = Math.max(host.clientWidth, 280), H = opts.H || 260;
   const svg = d3.select(host).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
   const top = 24, bottom = H - 26;
   const sel = MK.month();
@@ -1152,6 +1154,10 @@ window.MKhowtoMonthly = (R, all) => {
     const moreStaff = R.staff_avg > P.staff_avg, fewer = R.over_cap_per_day < P.over_cap_per_day;
     li([`Read the bars against the teal staffing line. From ${P.month_name} to ${R.month_name}, staff on the phones went from `, mk(P.month, 'staff_avg', f1(P.staff_avg)), ' to ', mk(m, 'staff_avg', f1(R.staff_avg)), ' FTE and calls exceeding capacity went from ', mk(P.month, 'over_cap_per_day', f0(P.over_cap_per_day)), ' to ', mk(m, 'over_cap_per_day', f0(R.over_cap_per_day)), ' per business day.', moreStaff && fewer ? ' More staff helped, but did not close the gap.' : '']);
   }
+  if (R.over_cap_fytd != null && R.over_cap_fytd_per_bday != null && R.over_cap_per_day != null) {
+    const diff = (R.over_cap_per_day - R.over_cap_fytd_per_bday) / R.over_cap_fytd_per_bday;
+    li(['Fiscal year to date: ', mk(m, 'over_cap_fytd', f0(R.over_cap_fytd)), ' calls exceeded capacity over ', mk(m, 'business_days_fytd', f0(R.business_days_fytd)), ' business days, about ', mk(m, 'over_cap_fytd_per_bday', f0(R.over_cap_fytd_per_bday)), ` per business day. ${R.month_name} was ${Math.abs(diff) <= 0.05 ? 'close to' : diff > 0 ? 'above' : 'below'} the year’s average so far.`]);
+  }
   li(['Lower bars are better; a bar at zero would mean staff returned every callback booked. The staffing line starts in August because daily staff counts began Aug 18, and dashed boxes are months still to come.']);
 };
 
@@ -1165,12 +1171,16 @@ window.MKhowto = (R, rows) => {
   const li = (parts) => { const l = el('li'); parts.filter(Boolean).forEach(p => l.append(typeof p === 'string' ? document.createTextNode(p) : p)); ul.appendChild(l); };
   const inM = rows.filter(r => r.date.slice(0, 7) === R.month);
   const ex = inM[inM.length - 1], qx = ex && q.data.find(r => r.date === ex.date);
-  li(['Think of the waiting line as a bathtub: new callback requests pour in, and completed callbacks drain out. Each bar is the water left over at the end of one business day, the callers added to the line that day.']);
+  li(['Think of a restaurant waitlist: when every table is full, your name goes on the list and you are called when one opens. The callback queue works the same way. Each bar shows how many more callers were added to the list than were called back that business day.']);
   if (ex && qx) li(['Example: on ', fd(P(ex.date)), ', callers booked ', mk('queue_daily', 'callbacks_scheduled', 'date=' + ex.date, f0(Number(qx.callbacks_scheduled))), ' callbacks and staff completed ', mk('queue_daily', 'callbacks_accepted', 'date=' + ex.date, f0(Number(qx.callbacks_accepted))), ', so that day’s bar is ', mk('daily_capacity', 'beyond_capacity', 'date=' + ex.date, f0(ex.beyond_capacity)), '.']);
   const staffed = inM.filter(r => r.staff_in_queue != null);
   const best = staffed.length ? staffed.reduce((a, b) => b.staff_in_queue > a.staff_in_queue ? b : a) : null;
   const allAbove = inM.length && inM.every(r => r.beyond_capacity > 0);
   if (best) li(['Compare the bars with the navy staffing line. Even on the best-staffed day, ', fd(P(best.date)), ' with ', mk('daily_capacity', 'staff_in_queue', 'date=' + best.date, f1(best.staff_in_queue)), ' FTE, ', mk('daily_capacity', 'beyond_capacity', 'date=' + best.date, f0(best.beyond_capacity)), ' callers were added. ', allAbove ? 'No bar reaches zero, so the line grew every business day: a sign of too few staff for the volume, not slow work.' : '']);
+  if (inM.length) {
+    const hi = inM.reduce((a, b) => b.beyond_capacity > a.beyond_capacity ? b : a), lo = inM.reduce((a, b) => b.beyond_capacity < a.beyond_capacity ? b : a);
+    li([`Range in ${R.month_name}: the heaviest day was ${fd(P(hi.date))}, when `, mk('daily_capacity', 'beyond_capacity', 'date=' + hi.date, f0(hi.beyond_capacity)), ` callers were added; the lightest was ${fd(P(lo.date))}, with `, mk('daily_capacity', 'beyond_capacity', 'date=' + lo.date, f0(lo.beyond_capacity)), '.']);
+  }
   li([R.cleanout_date ? `Gold dotted lines mark events. The tall bars just after the ${fd(P(R.cleanout_date))} clean-out reflect a surge of new requests. ` : 'Gold dotted lines mark events. ', 'Gaps in the navy line are days without a staff count; weekends and holidays are skipped.']);
 };
 
@@ -1180,7 +1190,7 @@ dash.onData(() => {
   const sel = MK.month();
   if (MK.state(hm, ['month_summary']) === 'ok' && sel) {
     const R4 = MK.row(); if (R4) MKhowtoMonthly(R4, dash.data('month_summary').data);
-    MKmonthly(hm, dash.data('month_summary').data, { cSel: MK.C.gold, cPrev: MK.C.navy, cLine: MK.C.teal, value: r => r.over_cap_per_day, fmt: MK.f0, line: r => r.staff_avg,
+    MKmonthly(hm, dash.data('month_summary').data, { H: 280, cSel: MK.C.gold, cPrev: MK.C.navy, cLine: MK.C.teal, value: r => r.over_cap_per_day, fmt: MK.f0, line: r => r.staff_avg,
       tip: r => [[MK.C.navy, 'Calls exceeding capacity per business day', r.over_cap_per_day == null ? 'n/a' : MK.f0(r.over_cap_per_day)], [null, `Month total (${r.business_days} business days)`, r.over_cap == null ? 'n/a' : MK.f0(r.over_cap)], [MK.C.teal, 'FTEs on the phone queue, average', r.staff_avg == null ? 'Not tracked' : MK.f1(r.staff_avg), 'line']] });
   }
   if (MK.state(hd, ['daily_capacity', 'month_summary']) === 'ok' && sel) {
