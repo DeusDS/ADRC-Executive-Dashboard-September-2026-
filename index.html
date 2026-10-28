@@ -293,7 +293,7 @@ html, body { margin: 0; padding: 0; background: var(--color-bg); }
       <div class="mk-sech"><span class="no">03</span><div class="tt"><span class="mk-mono k">Item 03 · Interactions handled<span class="kq">How much work was completed</span></span><h2 id="t3" data-source="month_summary">—</h2></div></div>
       <div class="mk-grid">
         <div class="mk-card"><h3>Work completed each month, by type</h3><p class="d">Total ADRC interactions handled, stacked by type; the number on top is the month’s total. Matches the A&amp;IS monthly dashboard. The reporting month is in full color.</p>
-          <ul class="mk-key"><li><span class="mk-sw" style="background:var(--mk-navy)"></span>Serviced interactions</li><li><span class="mk-sw" style="background:var(--mk-blue)"></span>Web intakes</li><li><span class="mk-sw" style="background:var(--mk-teal)"></span>Emails</li><li><span class="mk-sw" style="background:var(--mk-cyan)"></span>APS, MAC, walk-ins</li></ul>
+          <ul class="mk-key"><li><span class="mk-sw" style="background:var(--mk-navy)"></span>P28 calls</li><li><span class="mk-sw" style="background:var(--mk-blue)"></span>Web intakes</li><li><span class="mk-sw" style="background:var(--mk-teal)"></span>Emails</li><li><span class="mk-sw" style="background:var(--mk-cyan)"></span>APS, MAC, walk-ins</li></ul>
           <div class="mk-chart" id="c3m" data-source="interactions"></div>
           <div class="mk-mix" id="mix3" data-source="interactions"><span class="mk-mono hk" id="mix3-h">Mix of work</span><div class="bar" id="mix3-bar"></div><div class="rows" id="mix3-rows"></div><p class="ft" id="mix3-ft"></p></div>
           <p class="src">Source: ADRC Dashboard FY2027 workbook, monthly tabs.</p></div>
@@ -341,7 +341,7 @@ html, body { margin: 0; padding: 0; background: var(--color-bg); }
 dash.calc('month_summary', {
   inputs: ['queue_daily', 'adrc_monthly'],
   title: 'FY2027 reporting-month summary',
-  description: 'One row per FY2027 month (July 2026–June 2027): monthly-tab figures (serviced interactions as reported, excluding BRI, Resource Specialist and transfer calls), queue-tracker figures for business days in that month, FY-to-date totals, and per-business-day rates (business days = weekdays less ARC holidays).',
+  description: 'One row per FY2027 month (July 2026–June 2027): monthly-tab figures (P28 calls as reported, excluding BRI, Resource Specialist and transfer calls), queue-tracker figures for business days in that month, FY-to-date totals, and per-business-day rates (business days = weekdays less ARC holidays).',
   fn: (queue_daily, adrc_monthly) => {
     const n = v => (v == null || v === '') ? null : Number(v);
     const r1 = x => x == null ? null : Math.round(x * 10) / 10;
@@ -508,7 +508,7 @@ dash.calc('daily_capacity', {
 dash.calc('interactions', {
   inputs: ['adrc_monthly'],
   title: 'Interactions by month',
-  description: 'Total ADRC interactions handled each month, as reported on the A&IS monthly dashboard: serviced interactions (callbacks, voicemails, outbound; excludes BRI, Resource Specialist and transfer calls), web intakes, aging info emails, and APS, MAC and walk-ins, with each type’s share.',
+  description: 'Total ADRC interactions handled each month, as reported on the A&IS monthly dashboard: P28 calls (callbacks, voicemails, outbound; excludes BRI, Resource Specialist and transfer calls), web intakes, aging info emails, and APS, MAC and walk-ins, with each type’s share.',
   fn: (adrc_monthly) => adrc_monthly.map(r => {
     const HOL = ['2026-07-03', '2026-09-07', '2026-11-11', '2026-11-26', '2026-11-27', '2026-12-24', '2026-12-25', '2027-01-01', '2027-01-18', '2027-05-31', '2027-06-18'];
     const bdays = (m) => { const y = Number(m.slice(0, 4)), mo = Number(m.slice(5, 7)); let c = 0; for (let d = new Date(Date.UTC(y, mo - 1, 1)); d.getUTCMonth() === mo - 1; d.setUTCDate(d.getUTCDate() + 1)) { const w = d.getUTCDay(), iso = d.toISOString().slice(0, 10); if (w > 0 && w < 6 && !HOL.includes(iso)) c++; } return c; };
@@ -531,7 +531,7 @@ dash.calc('interactions_table', {
     const HOL = ['2026-07-03', '2026-09-07', '2026-11-11', '2026-11-26', '2026-11-27', '2026-12-24', '2026-12-25', '2027-01-01', '2027-01-18', '2027-05-31', '2027-06-18'];
     const bdays = (m) => { const y = Number(m.slice(0, 4)), mo = Number(m.slice(5, 7)); let c = 0; for (let d = new Date(Date.UTC(y, mo - 1, 1)); d.getUTCMonth() === mo - 1; d.setUTCDate(d.getUTCDate() + 1)) { const w = d.getUTCDay(), iso = d.toISOString().slice(0, 10); if (w > 0 && w < 6 && !HOL.includes(iso)) c++; } return c; };
     const defs = [
-      ['Serviced interactions (callbacks, voicemails, outbound)', r => v(r, 'calls_reported')],
+      ['P28 calls (callbacks, voicemails, outbound)', r => v(r, 'calls_reported')],
       ['Empowerline aging info emails', r => v(r, 'info_emails')],
       ['Walk-ins', r => v(r, 'walk_ins')],
       ['Web intakes', r => v(r, 'web_intakes')],
@@ -809,7 +809,7 @@ dash.onData(() => {
   } else if (tab === 'ex-3') {
     cards = [
       k3,
-      card('03', 'Serviced interactions', 'calls', R.calls, f0, 'callbacks, voicemails and outbound', R.calls_share != null ? [chip('neu', [mark(m, 'calls_share', pctS(R.calls_share)), ' of all interactions'])] : [],
+      card('03', 'P28 calls', 'calls', R.calls, f0, 'callbacks, voicemails and outbound', R.calls_share != null ? [chip('neu', [mark(m, 'calls_share', pctS(R.calls_share)), ' of all interactions'])] : [],
         ['Excludes BRI, Resource Specialist and transfer calls'], 'Pending'),
       card('03', 'Web intakes', 'web_intakes', R.web_intakes, f0, 'online intake forms', R.web_change != null ? [chip('neu', [R.web_change >= 0 ? '▲ ' : '▼ ', mark(m, 'web_change', sgn(R.web_change)), ` vs ${prevAbbr}`])] : [],
         Pv && Pv.web_intakes != null ? [Pv.month_name + ': ', mp('web_intakes', f0(Pv.web_intakes))] : [], 'Pending'),
@@ -821,10 +821,10 @@ dash.onData(() => {
         R.change_pct_bday != null ? ['The team handled about ', mark(m, 'interactions_per_bday', f0(R.interactions_per_bday)), ' interactions per business day, ', mark(m, 'change_pct_bday', spct(R.change_pct_bday)), ` from ${Pv.month_name}.`] : []),
       (WHY[m]
         ? find('Why', WHY[m].h, WHY[m].b)
-        : find('Serviced interactions', R.calls_change != null && R.calls_change < 0 ? 'Serviced interactions fell.' : 'Serviced interactions rose.',
-            R.calls_change != null ? ['Serviced interactions changed by ', mark(m, 'calls_change', sgn(R.calls_change)), ` compared with ${Pv.month_name}.`] : [])),
-      find('Share', 'Serviced interactions are most of the work.',
-        R.calls_share != null ? ['Serviced interactions made up ', mark(m, 'calls_share', pctS(R.calls_share)), ' of all interactions; web intakes added ', mark(m, 'web_intakes', f0(R.web_intakes)), ' and other channels ', mark(m, 'other_channels', f0(R.other_channels)), '.'] : [])
+        : find('P28 calls', R.calls_change != null && R.calls_change < 0 ? 'P28 calls fell.' : 'P28 calls rose.',
+            R.calls_change != null ? ['P28 calls changed by ', mark(m, 'calls_change', sgn(R.calls_change)), ` compared with ${Pv.month_name}.`] : [])),
+      find('Share', 'P28 calls are most of the work.',
+        R.calls_share != null ? ['P28 calls made up ', mark(m, 'calls_share', pctS(R.calls_share)), ' of all interactions; web intakes added ', mark(m, 'web_intakes', f0(R.web_intakes)), ' and other channels ', mark(m, 'other_channels', f0(R.other_channels)), '.'] : [])
     ];
   } else if (tab === 'ex-4') {
     cards = [
@@ -901,7 +901,7 @@ dash.onData(() => {
     note([t('Key figures and findings. '), 'Each view opens with its own key figure cards and findings. Each card shows the monthly figure in large type, a status tag beneath it (red flags a concern, green an improvement, grey a neutral fact), and a supporting detail line, usually the month-end reading from the queue tracker. Rates such as “per business day” divide the month’s total by its business days.']),
     note([t('Item 01, days to return a call. '), 'The monthly chart shows the monthly tab’s average business days to return a call; the gold bar is the reporting month, navy bars are earlier months, and dashed outlines are months not yet reported. The red dashed line is the DAS standard of 2 business days. The weekly chart averages the tracker’s daily reading of how long the oldest waiting callback has been in the queue (column T); navy weeks are above the standard, teal weeks are at or below it, and shaded weeks fall in the reporting month. Because one is an average wait and the other tracks the oldest callback, the two can differ.']),
     note([t('Item 02, calls in the P28 queue. '), 'The monthly chart shows callbacks not serviced but still in the callback list at month-end, as reported on the monthly tab. In the weekly chart, the navy line is a point-in-time count of callbacks not yet dialed on the last reported day of each week (column Q), and the grey bars are new callbacks booked per business day that week (column C, right axis), so four-day holiday weeks and the partial last week compare fairly with full weeks. The two counts measure different things', both ? ' (' : '', both ? mark(m, 'still_in_list', f0(R.still_in_list)) : '', both ? ` in the callback list at the end of ${mon}, against ` : '', both ? mark(m, 'queue_end', f0(R.queue_end)) : '', both ? ` not yet dialed on ${fd(P(R.month_last_day))})` : '', '.']),
-    note([t('Item 03, interactions handled. '), 'Figures match the A&IS monthly dashboard’s Total Number of ADRC Interactions Handled. Each bar stacks the month’s interactions by type: serviced interactions (navy: callbacks, voicemails and outbound calls), web intakes (deep teal-blue), Empowerline aging info emails (teal), and APS referrals, MAC referrals and walk-ins (slate). Serviced interactions exclude BRI, Resource Specialist and transfer calls, as reported', R.tracker_calls != null ? `; the queue tracker’s columns J–L include those queues, so they total more (` : '', R.tracker_calls != null ? mark(m, 'tracker_calls', f0(R.tracker_calls)) : '', R.tracker_calls != null ? ` in ${mon}, against `: '', R.tracker_calls != null ? mark(m, 'calls', f0(R.calls)) : '', R.tracker_calls != null ? ' reported)' : '', '. In the table, the highlighted column is the reporting month, the FYTD column adds every month to date (for interactions per business day it is the FYTD total divided by FYTD business days), and the last column shows the change from the prior month, ▲ in teal and ▼ in red.']),
+    note([t('Item 03, interactions handled. '), 'Figures match the A&IS monthly dashboard’s Total Number of ADRC Interactions Handled. Each bar stacks the month’s interactions by type: P28 calls (navy: callbacks, voicemails and outbound calls), web intakes (deep teal-blue), Empowerline aging info emails (teal), and APS referrals, MAC referrals and walk-ins (slate). P28 calls exclude BRI, Resource Specialist and transfer calls, as reported', R.tracker_calls != null ? `; the queue tracker’s columns J–L include those queues, so they total more (` : '', R.tracker_calls != null ? mark(m, 'tracker_calls', f0(R.tracker_calls)) : '', R.tracker_calls != null ? ` in ${mon}, against `: '', R.tracker_calls != null ? mark(m, 'calls', f0(R.calls)) : '', R.tracker_calls != null ? ' reported)' : '', '. In the table, the highlighted column is the reporting month, the FYTD column adds every month to date (for interactions per business day it is the FYTD total divided by FYTD business days), and the last column shows the change from the prior month, ▲ in teal and ▼ in red.']),
     note([t('Unite Us and Kaiser referrals. '), 'These are not counted in ADRC interactions handled. They are tracked monthly on the program’s master spreadsheet and arrive through a separate channel, so including them would overstate ADRC volume.']),
     note([t('September change in interactions. '), 'Program staff attribute September’s lower volume to the Sept 8 clean-out of old callbacks and to an operational shift: more counselors moved into the callback queue instead of screening for CCSP, which reduced outbound calls.']),
     note([t('Item 04, capacity and staffing. '), 'Calls exceeding capacity are callbacks callers booked minus callbacks staff reached and the caller accepted, so they include callers who did not answer. The monthly chart divides the monthly tab’s scheduled-minus-accepted total by the month’s business days, with a teal line for the average FTE logged into the phone queue each business day (right axis). The business-day chart uses tracker column E, shown as a positive count, with one bar per business day: deep teal-blue bars fall in the reporting month and lighter bars are earlier days, the navy line is FTE in the queue (gaps are days with no staff count), and gold markers label key events.']),
@@ -1041,7 +1041,7 @@ dash.onData(() => {
 dash.onData(() => {
   const host = MK.box('c3m');
   const sel = MK.month();
-  const keys = [['serviced', 'Serviced interactions'], ['web_intakes', 'Web intakes'], ['emails', 'Emails'], ['referrals', 'APS, MAC, walk-ins']];
+  const keys = [['serviced', 'P28 calls'], ['web_intakes', 'Web intakes'], ['emails', 'Emails'], ['referrals', 'APS, MAC, walk-ins']];
   const colors = [MK.C.navy, MK.C.blue, MK.C.teal, MK.C.cyan];
   const ms = dash.data('month_summary');
   if (MK.state(host, ['interactions', 'month_summary']) === 'ok' && sel) {
@@ -1090,7 +1090,7 @@ dash.onData(() => {
       row.append(sw, MK.el('span', 'nm', n), vl);
       rowsEl.appendChild(row);
     });
-    ft.append('Serviced interactions (callbacks, voicemails and outbound) made up ', mk('calls_share', d3.format('.1%')(r.calls_share)), ` of all interactions in ${label}, about `, mk('per_bday', MK.f0(r.per_bday)), ' interactions per business day across ', mk('business_days', MK.f0(r.business_days)), ' business days.');
+    ft.append('P28 calls (callbacks, voicemails and outbound) made up ', mk('calls_share', d3.format('.1%')(r.calls_share)), ` of all interactions in ${label}, about `, mk('per_bday', MK.f0(r.per_bday)), ' interactions per business day across ', mk('business_days', MK.f0(r.business_days)), ' business days.');
   })();
 
   /* table: months through the reporting month, FYTD, change */
@@ -1126,9 +1126,9 @@ dash.onData(() => {
   const hl = document.getElementById('tbl-hl'); hl.replaceChildren();
   if (!last) return;
   const k = last.slice(2), prevCol = cols.length > 1 ? cols[cols.length - 2] : null;
-  const leaf = t.data.filter(r => ['Serviced interactions (callbacks, voicemails, outbound)', 'Empowerline aging info emails', 'Walk-ins', 'Web intakes', 'APS referrals', 'MAC referrals'].includes(r.category) && r['chg_' + k] != null);
+  const leaf = t.data.filter(r => ['P28 calls (callbacks, voicemails, outbound)', 'Empowerline aging info emails', 'Walk-ins', 'Web intakes', 'APS referrals', 'MAC referrals'].includes(r.category) && r['chg_' + k] != null);
   const mon = c => d3.utcFormat('%b')(MK.P(c.slice(2).replace('_', '-') + '-01'));
-  const short = c => ({ 'Serviced interactions (callbacks, voicemails, outbound)': 'Serviced interactions', 'Empowerline aging info emails': 'Aging info emails' })[c] || c;
+  const short = c => ({ 'P28 calls (callbacks, voicemails, outbound)': 'P28 calls', 'Empowerline aging info emails': 'Aging info emails' })[c] || c;
   const mk = (cat, field, text, cls) => { const b = MK.el('b', 'v' + (cls ? ' ' + cls : ''), text); b.dataset.source = 'interactions_table'; b.dataset.field = field; b.dataset.where = 'category=' + cat; return b; };
   const cell = (key, val, note) => { const c = MK.el('div', 'c'); c.append(MK.el('span', 'mk-mono k', key), val, MK.el('span', 'n', note)); hl.appendChild(c); };
   const sgn = d3.format('+,');
