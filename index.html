@@ -186,19 +186,23 @@ html, body { margin: 0; padding: 0; background: var(--color-bg); }
 .mk-tip .ev { margin-top: .2rem; color: var(--mk-muted); }
 .mk-tablewrap { overflow-x: auto; }
 .mk-table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
-.mk-table th, .mk-table td { padding: .5rem .55rem; text-align: right; white-space: nowrap; }
+.mk-table th, .mk-table td { padding: .55rem .5rem; text-align: right; white-space: nowrap; }
+.mk-table th:last-child, .mk-table td:last-child { padding-right: .6rem; }
+.mk-table th:first-child, .mk-table td:first-child { text-align: left; white-space: normal; min-width: 11rem; padding-left: .6rem; }
 .mk-table thead th { font-family: var(--mk-mono); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: #FFFFFF; font-weight: 600; background: #04132e; }
 .mk-table thead th.sel { background: #c8a04a; color: #1c1304; }
-.mk-table tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--mk-shade) 55%, transparent); }
+.mk-table tbody td { border-bottom: 1px solid var(--mk-line); background: transparent; }
+.mk-table tbody tr:nth-child(odd):not(.tot):not(.rate) td { background: color-mix(in srgb, var(--mk-shade) 70%, transparent); }
+.mk-table td.sel { background: var(--mk-gold-t); font-weight: 600; color: var(--mk-ink); }
+.mk-table tbody tr:nth-child(odd):not(.tot):not(.rate) td.sel { background: color-mix(in srgb, var(--mk-gold) 30%, transparent); }
 .mk-table td.up { color: var(--mk-teal); font-weight: 600; }
 .mk-table td.down { color: var(--mk-coral); font-weight: 600; }
-.mk-table tbody td { border-bottom: 1px solid var(--mk-line); }
-.mk-table th:first-child, .mk-table td:first-child { text-align: left; white-space: normal; min-width: 11rem; padding-left: 0; }
-.mk-table tr.sub td:first-child { padding-left: 1rem; color: var(--mk-muted); }
-.mk-table tr.rate td { color: var(--mk-muted); font-style: italic; background: transparent !important; }
-.mk-table tr.rate td.sel { color: var(--mk-ink); font-weight: 600; background: var(--mk-gold-t) !important; }
-.mk-table tr.tot td { font-weight: 700; border-top: 2px solid var(--mk-gold); border-bottom: 0; background: var(--mk-blue-t) !important; }
-.mk-table td.sel { background: var(--mk-gold-t) !important; font-weight: 600; }
+.mk-table tbody tr.tot td { font-weight: 700; border-top: 2px solid var(--mk-gold); border-bottom: 1px solid var(--mk-gold); background: color-mix(in srgb, var(--mk-gold) 15%, var(--mk-card)); }
+.mk-table tbody tr.tot td.sel { background: color-mix(in srgb, var(--mk-gold) 38%, var(--mk-card)); }
+.mk-table tr.rate td { color: var(--mk-muted); font-style: italic; }
+.mk-table tr.rate td.sel { color: var(--mk-ink); font-style: italic; }
+.mk-table tr.rate td.up { color: var(--mk-teal); font-style: normal; }
+.mk-table tr.rate td.down { color: var(--mk-coral); font-style: normal; }
 .mk-ctx { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: 0; }
 .mk-ctx .c { padding: .4rem 1rem .4rem 0; display: flex; flex-direction: column; gap: .3rem; }
 .mk-ctx .c + .c { border-left: 1px solid var(--mk-line); padding-left: 1rem; }
@@ -897,7 +901,7 @@ dash.onData(() => {
     note([t('Key figures and findings. '), 'Each view opens with its own key figure cards and findings. Each card shows the monthly figure in large type, a status tag beneath it (red flags a concern, green an improvement, grey a neutral fact), and a supporting detail line, usually the month-end reading from the queue tracker. Rates such as “per business day” divide the month’s total by its business days.']),
     note([t('Item 01, days to return a call. '), 'The monthly chart shows the monthly tab’s average business days to return a call; the gold bar is the reporting month, navy bars are earlier months, and dashed outlines are months not yet reported. The red dashed line is the DAS standard of 2 business days. The weekly chart averages the tracker’s daily reading of how long the oldest waiting callback has been in the queue (column T); navy weeks are above the standard, teal weeks are at or below it, and shaded weeks fall in the reporting month. Because one is an average wait and the other tracks the oldest callback, the two can differ.']),
     note([t('Item 02, calls in the P28 queue. '), 'The monthly chart shows callbacks not serviced but still in the callback list at month-end, as reported on the monthly tab. In the weekly chart, the navy line is a point-in-time count of callbacks not yet dialed on the last reported day of each week (column Q), and the grey bars are new callbacks booked per business day that week (column C, right axis), so four-day holiday weeks and the partial last week compare fairly with full weeks. The two counts measure different things', both ? ' (' : '', both ? mark(m, 'still_in_list', f0(R.still_in_list)) : '', both ? ` in the callback list at the end of ${mon}, against ` : '', both ? mark(m, 'queue_end', f0(R.queue_end)) : '', both ? ` not yet dialed on ${fd(P(R.month_last_day))})` : '', '.']),
-    note([t('Item 03, interactions handled. '), 'Figures match the A&IS monthly dashboard’s Total Number of ADRC Interactions Handled. Each bar stacks the month’s interactions by type: serviced interactions (navy: callbacks, voicemails and outbound calls), web intakes (deep teal-blue), Empowerline aging info emails (teal), and APS referrals, MAC referrals and walk-ins (slate). Serviced interactions exclude BRI, Resource Specialist and transfer calls, as reported', R.tracker_calls != null ? `; the queue tracker’s columns J–L include those queues, so they total more (` : '', R.tracker_calls != null ? mark(m, 'tracker_calls', f0(R.tracker_calls)) : '', R.tracker_calls != null ? ` in ${mon}, against `: '', R.tracker_calls != null ? mark(m, 'calls', f0(R.calls)) : '', R.tracker_calls != null ? ' reported)' : '', '. In the table, the highlighted column is the reporting month, the FYTD column adds every month to date (its gold bar shows each type’s share of all interactions; for interactions per business day it is the FYTD total divided by FYTD business days), and the last column shows the change from the prior month, ▲ in teal and ▼ in red.']),
+    note([t('Item 03, interactions handled. '), 'Figures match the A&IS monthly dashboard’s Total Number of ADRC Interactions Handled. Each bar stacks the month’s interactions by type: serviced interactions (navy: callbacks, voicemails and outbound calls), web intakes (deep teal-blue), Empowerline aging info emails (teal), and APS referrals, MAC referrals and walk-ins (slate). Serviced interactions exclude BRI, Resource Specialist and transfer calls, as reported', R.tracker_calls != null ? `; the queue tracker’s columns J–L include those queues, so they total more (` : '', R.tracker_calls != null ? mark(m, 'tracker_calls', f0(R.tracker_calls)) : '', R.tracker_calls != null ? ` in ${mon}, against `: '', R.tracker_calls != null ? mark(m, 'calls', f0(R.calls)) : '', R.tracker_calls != null ? ' reported)' : '', '. In the table, the highlighted column is the reporting month, the FYTD column adds every month to date (for interactions per business day it is the FYTD total divided by FYTD business days), and the last column shows the change from the prior month, ▲ in teal and ▼ in red.']),
     note([t('Unite Us and Kaiser referrals. '), 'These are not counted in ADRC interactions handled. They are tracked monthly on the program’s master spreadsheet and arrive through a separate channel, so including them would overstate ADRC volume.']),
     note([t('September change in interactions. '), 'Program staff attribute September’s lower volume to the Sept 8 clean-out of old callbacks and to an operational shift: more counselors moved into the callback queue instead of screening for CCSP, which reduced outbound calls.']),
     note([t('Item 04, capacity and staffing. '), 'Calls exceeding capacity are callbacks callers booked minus callbacks staff reached and the caller accepted, so they include callers who did not answer. The monthly chart divides the monthly tab’s scheduled-minus-accepted total by the month’s business days, with a teal line for the average FTE logged into the phone queue each business day (right axis). The business-day chart uses tracker column E, shown as a positive count, with one bar per business day: deep teal-blue bars fall in the reporting month and lighter bars are earlier days, the navy line is FTE in the queue (gaps are days with no staff count), and gold markers label key events.']),
@@ -1113,8 +1117,8 @@ dash.onData(() => {
     if (last) {
       const ytd = r['ytd_' + last.slice(2)], totRow = t.data.find(x => x.category === 'Total ADRC interactions handled'), share = totRow ? ytd / totRow['ytd_' + last.slice(2)] : 0;
       td(MK.f0(ytd));
-      const cell = row.lastChild; if (!['Total ADRC interactions handled', 'Business days', 'Interactions per business day'].includes(r.category)) cell.style.background = `linear-gradient(90deg, var(--mk-gold-t) ${Math.round(share * 100)}%, transparent ${Math.round(share * 100)}%)`;
-      const ch = r['chg_' + last.slice(2)]; td(ch == null ? '—' : (ch > 0 ? '▲ +' : ch < 0 ? '▼ ' : '') + MK.f0(ch), ch > 0 ? 'up' : ch < 0 ? 'down' : '');
+      const ch = r['chg_' + last.slice(2)]; const neutral = r.category === 'Business days';  // more or fewer working days is neither good nor bad
+      td(ch == null ? '—' : (ch > 0 ? '▲ +' : ch < 0 ? '▼ ' : '') + MK.f0(ch), neutral ? '' : ch > 0 ? 'up' : ch < 0 ? 'down' : '');
     }
     tbody.appendChild(row);
   });
